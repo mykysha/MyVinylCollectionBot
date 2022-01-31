@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	logger "github.com/nndergunov/tgBot/server/pkg/log"
+	"github.com/nndergunov/tgBot/server/cmd/log"
 )
 
 type ChatBot struct {
@@ -12,7 +12,6 @@ type ChatBot struct {
 	startButtons tgbotapi.ReplyKeyboardMarkup
 	editPrompt   tgbotapi.InlineKeyboardMarkup
 	viewPrompt   tgbotapi.InlineKeyboardMarkup
-	editOptions  tgbotapi.InlineKeyboardMarkup
 }
 
 func (b *ChatBot) Init(token string, l *logger.Logger) error {
@@ -25,6 +24,8 @@ func (b *ChatBot) Init(token string, l *logger.Logger) error {
 	b.log = l
 
 	b.generateButtons()
+	b.generateEditPrompt()
+	b.generateViewPrompt()
 
 	return nil
 }
@@ -53,6 +54,9 @@ func (b *ChatBot) generateButtons() {
 
 	b.startButtons = startBttns
 
+}
+
+func (b *ChatBot) generateEditPrompt() {
 	editPrompt := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Add new", "Add new"),
@@ -66,7 +70,9 @@ func (b *ChatBot) generateButtons() {
 	)
 
 	b.editPrompt = editPrompt
+}
 
+func (b *ChatBot) generateViewPrompt() {
 	viewPrompt := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("View all full", "View all full"),
