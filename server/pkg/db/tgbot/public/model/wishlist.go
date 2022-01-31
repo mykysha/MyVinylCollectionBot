@@ -7,9 +7,9 @@
 
 package model
 
-type Collection struct {
-	ID         int32
-	OwnerID    *int32
-	AlbumID    *int32
-	LocationID *int32
+type Wishlist struct {
+	ID      int32
+	OwnerID *int32
+	AlbumID *int32
+	Store   *string
 }

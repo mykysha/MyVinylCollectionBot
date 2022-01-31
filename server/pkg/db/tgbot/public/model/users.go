@@ -9,6 +9,6 @@ package model
 
 type Users struct {
 	ID         int32
-	Telegramid *string
+	Telegramid *int32
 	Username   *string
 }

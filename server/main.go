@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/nndergunov/tgBot/server/pkg/api"
+	"github.com/nndergunov/tgBot/server/api"
+	"github.com/nndergunov/tgBot/server/pkg/log"
 	"log"
 	"os"
 
@@ -14,19 +15,23 @@ func main() {
 		panic(err)
 	}
 
-	logger := log.New(f, "bot", log.LstdFlags)
+	l := log.New(f, "bot ", log.LstdFlags)
+
+	botLogger := &logger.Logger{}
+
+	botLogger.Init(l)
 
 	if err = godotenv.Load(".env"); err != nil {
-		logger.Printf("env file read: %v", err)
+		l.Printf("env file read: %v", err)
 	}
 
 	token := os.Getenv("apitoken")
 
 	bot := api.ChatBot{}
 
-	err = bot.Init(token, logger)
+	err = bot.Init(token, botLogger)
 	if err != nil {
-		logger.Println(err)
+		l.Println(err)
 	}
 
 	bot.Handle()

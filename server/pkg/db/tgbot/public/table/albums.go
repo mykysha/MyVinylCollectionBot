@@ -26,7 +26,6 @@ type albumsTable struct {
 	Label       postgres.ColumnInteger
 	Coloured    postgres.ColumnBool
 	Cover       postgres.ColumnString
-	LocationID  postgres.ColumnInteger
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -66,9 +65,8 @@ func newAlbumsTableImpl(schemaName, tableName, alias string) albumsTable {
 		LabelColumn       = postgres.IntegerColumn("label")
 		ColouredColumn    = postgres.BoolColumn("coloured")
 		CoverColumn       = postgres.StringColumn("cover")
-		LocationIDColumn  = postgres.IntegerColumn("location_id")
-		allColumns        = postgres.ColumnList{IDColumn, ArtistIDColumn, AlbumNameColumn, GenreColumn, ReleaseYearColumn, ReissueYearColumn, LabelColumn, ColouredColumn, CoverColumn, LocationIDColumn}
-		mutableColumns    = postgres.ColumnList{IDColumn, ArtistIDColumn, AlbumNameColumn, GenreColumn, ReleaseYearColumn, ReissueYearColumn, LabelColumn, ColouredColumn, CoverColumn, LocationIDColumn}
+		allColumns        = postgres.ColumnList{IDColumn, ArtistIDColumn, AlbumNameColumn, GenreColumn, ReleaseYearColumn, ReissueYearColumn, LabelColumn, ColouredColumn, CoverColumn}
+		mutableColumns    = postgres.ColumnList{IDColumn, ArtistIDColumn, AlbumNameColumn, GenreColumn, ReleaseYearColumn, ReissueYearColumn, LabelColumn, ColouredColumn, CoverColumn}
 	)
 
 	return albumsTable{
@@ -84,7 +82,6 @@ func newAlbumsTableImpl(schemaName, tableName, alias string) albumsTable {
 		Label:       LabelColumn,
 		Coloured:    ColouredColumn,
 		Cover:       CoverColumn,
-		LocationID:  LocationIDColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

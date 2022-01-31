@@ -16,6 +16,5 @@ type Albums struct {
 	ReissueYear *int32
 	Label       *int32
 	Coloured    *bool
-	Cover       *[]byte
-	LocationID  *int32
+	Cover       *string
 }

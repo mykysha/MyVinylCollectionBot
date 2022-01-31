@@ -18,7 +18,7 @@ type usersTable struct {
 
 	//Columns
 	ID         postgres.ColumnInteger
-	Telegramid postgres.ColumnString
+	Telegramid postgres.ColumnInteger
 	Username   postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
@@ -51,7 +51,7 @@ func newUsersTable(schemaName, tableName, alias string) *UsersTable {
 func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 	var (
 		IDColumn         = postgres.IntegerColumn("id")
-		TelegramidColumn = postgres.StringColumn("telegramid")
+		TelegramidColumn = postgres.IntegerColumn("telegramid")
 		UsernameColumn   = postgres.StringColumn("username")
 		allColumns       = postgres.ColumnList{IDColumn, TelegramidColumn, UsernameColumn}
 		mutableColumns   = postgres.ColumnList{IDColumn, TelegramidColumn, UsernameColumn}

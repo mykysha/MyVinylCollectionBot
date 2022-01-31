@@ -17,9 +17,10 @@ type collectionTable struct {
 	postgres.Table
 
 	//Columns
-	ID      postgres.ColumnInteger
-	OwnerID postgres.ColumnInteger
-	AlbumID postgres.ColumnInteger
+	ID         postgres.ColumnInteger
+	OwnerID    postgres.ColumnInteger
+	AlbumID    postgres.ColumnInteger
+	LocationID postgres.ColumnInteger
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -50,20 +51,22 @@ func newCollectionTable(schemaName, tableName, alias string) *CollectionTable {
 
 func newCollectionTableImpl(schemaName, tableName, alias string) collectionTable {
 	var (
-		IDColumn       = postgres.IntegerColumn("id")
-		OwnerIDColumn  = postgres.IntegerColumn("owner_id")
-		AlbumIDColumn  = postgres.IntegerColumn("album_id")
-		allColumns     = postgres.ColumnList{IDColumn, OwnerIDColumn, AlbumIDColumn}
-		mutableColumns = postgres.ColumnList{IDColumn, OwnerIDColumn, AlbumIDColumn}
+		IDColumn         = postgres.IntegerColumn("id")
+		OwnerIDColumn    = postgres.IntegerColumn("owner_id")
+		AlbumIDColumn    = postgres.IntegerColumn("album_id")
+		LocationIDColumn = postgres.IntegerColumn("location_id")
+		allColumns       = postgres.ColumnList{IDColumn, OwnerIDColumn, AlbumIDColumn, LocationIDColumn}
+		mutableColumns   = postgres.ColumnList{IDColumn, OwnerIDColumn, AlbumIDColumn, LocationIDColumn}
 	)
 
 	return collectionTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:      IDColumn,
-		OwnerID: OwnerIDColumn,
-		AlbumID: AlbumIDColumn,
+		ID:         IDColumn,
+		OwnerID:    OwnerIDColumn,
+		AlbumID:    AlbumIDColumn,
+		LocationID: LocationIDColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
