@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/nndergunov/tgBot/server/api"
-	"github.com/nndergunov/tgBot/server/cmd/log"
+	"github.com/nndergunov/tgBot/server/pkg/log"
 	"log"
 	"os"
 

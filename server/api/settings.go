@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/nndergunov/tgBot/server/cmd/log"
+	"github.com/nndergunov/tgBot/server/pkg/log"
 )
 
 type ChatBot struct {

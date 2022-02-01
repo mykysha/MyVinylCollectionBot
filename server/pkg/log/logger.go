@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"github.com/nndergunov/tgBot/server/pkg/domain"
 	"log"
 )
 
@@ -56,9 +57,9 @@ func (l Logger) PollLog(li logInfo, question string) {
 	l.log.Println(logMsg)
 }
 
-func (l Logger) TextLog(li logInfo, text string) {
+func (l Logger) TextLog(msg domain.TextMessage) {
 	logMsg := fmt.Sprintf("ID: %v, FirstName: %s, LastName: %s, UserName: %s, Text: %s, Time: %v",
-		li.chatID, li.firstName, li.lastName, li.userName, text, li.time)
+		msg.ChatID, msg.FirstName, msg.LastName, msg.UserName, msg.Text, msg.Time)
 
 	l.log.Println(logMsg)
 }

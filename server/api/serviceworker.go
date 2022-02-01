@@ -40,7 +40,7 @@ func (b ChatBot) photoHandler(update tgbotapi.Update) {
 
 	photoID := update.Message.Photo
 
-	photo := tgbotapi.FileID(photoID[len(photoID)-1].FileID)
+	photo := tgbotapi.FileID(photoID[len(photoID)-1].FileUniqueID)
 
 	photoMsg := tgbotapi.NewPhoto(update.Message.Chat.ID, photo)
 
