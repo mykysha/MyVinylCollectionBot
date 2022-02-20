@@ -16,7 +16,7 @@ var Info = newInfoTable("public", "info", "")
 type infoTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	Creator   postgres.ColumnString
 	Purpose   postgres.ColumnString
 	Starttime postgres.ColumnString
@@ -60,7 +60,7 @@ func newInfoTableImpl(schemaName, tableName, alias string) infoTable {
 	return infoTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
-		//Columns
+		// Columns
 		Creator:   CreatorColumn,
 		Purpose:   PurposeColumn,
 		Starttime: StarttimeColumn,

@@ -16,7 +16,7 @@ var Wishlist = newWishlistTable("public", "wishlist", "")
 type wishlistTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	ID      postgres.ColumnInteger
 	OwnerID postgres.ColumnInteger
 	AlbumID postgres.ColumnInteger
@@ -62,7 +62,7 @@ func newWishlistTableImpl(schemaName, tableName, alias string) wishlistTable {
 	return wishlistTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
-		//Columns
+		// Columns
 		ID:      IDColumn,
 		OwnerID: OwnerIDColumn,
 		AlbumID: AlbumIDColumn,

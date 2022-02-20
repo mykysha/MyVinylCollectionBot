@@ -16,7 +16,7 @@ var Users = newUsersTable("public", "users", "")
 type usersTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	ID         postgres.ColumnInteger
 	Telegramid postgres.ColumnInteger
 	Username   postgres.ColumnString
@@ -60,7 +60,7 @@ func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 	return usersTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
-		//Columns
+		// Columns
 		ID:         IDColumn,
 		Telegramid: TelegramidColumn,
 		Username:   UsernameColumn,

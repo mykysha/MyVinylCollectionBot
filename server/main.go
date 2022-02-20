@@ -1,12 +1,14 @@
 package main
 
 import (
-	"github.com/nndergunov/tgBot/server/api"
-	"github.com/nndergunov/tgBot/server/pkg/log"
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/nndergunov/tgBot/server/api"
+	db "github.com/nndergunov/tgBot/server/pkg/db/service"
+	"github.com/nndergunov/tgBot/server/pkg/log"
 )
 
 func main() {
@@ -25,11 +27,23 @@ func main() {
 		l.Printf("env file read: %v", err)
 	}
 
+	dbSource := fmt.Sprintf(
+		"host=" + os.Getenv("HOST") +
+			" port=" + os.Getenv("PORT") +
+			" user=" + os.Getenv("USER") +
+			" password=" + os.Getenv("PASS") +
+			" dbname=" + os.Getenv("NAME") +
+			" sslmode=" + os.Getenv("SSL"),
+	)
+
+	database, err := db.NewDB(dbSource)
+	if err != nil {
+		l.Println(err)
+	}
+
 	token := os.Getenv("apitoken")
 
-	bot := api.ChatBot{}
-
-	err = bot.Init(token, botLogger)
+	bot, err := api.NewChatBot(token, botLogger, database)
 	if err != nil {
 		l.Println(err)
 	}

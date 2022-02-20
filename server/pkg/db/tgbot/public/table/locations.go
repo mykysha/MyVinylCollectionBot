@@ -16,7 +16,7 @@ var Locations = newLocationsTable("public", "locations", "")
 type locationsTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	ID     postgres.ColumnInteger
 	UserID postgres.ColumnInteger
 	Name   postgres.ColumnString
@@ -60,7 +60,7 @@ func newLocationsTableImpl(schemaName, tableName, alias string) locationsTable {
 	return locationsTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
-		//Columns
+		// Columns
 		ID:     IDColumn,
 		UserID: UserIDColumn,
 		Name:   NameColumn,

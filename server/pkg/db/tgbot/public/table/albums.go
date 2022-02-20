@@ -16,7 +16,7 @@ var Albums = newAlbumsTable("public", "albums", "")
 type albumsTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	ID          postgres.ColumnInteger
 	ArtistID    postgres.ColumnInteger
 	AlbumName   postgres.ColumnString
@@ -72,7 +72,7 @@ func newAlbumsTableImpl(schemaName, tableName, alias string) albumsTable {
 	return albumsTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
-		//Columns
+		// Columns
 		ID:          IDColumn,
 		ArtistID:    ArtistIDColumn,
 		AlbumName:   AlbumNameColumn,

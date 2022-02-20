@@ -2,8 +2,9 @@ package logger
 
 import (
 	"fmt"
-	"github.com/nndergunov/tgBot/server/pkg/domain"
 	"log"
+
+	"github.com/nndergunov/tgBot/server/pkg/domain"
 )
 
 type Logger struct {

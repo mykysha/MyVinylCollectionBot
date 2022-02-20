@@ -2,32 +2,41 @@ package api
 
 import (
 	"fmt"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/nndergunov/tgBot/server/pkg/log"
+	"github.com/nndergunov/tgBot/server/pkg/db/service"
+	logger "github.com/nndergunov/tgBot/server/pkg/log"
 )
 
 type ChatBot struct {
 	bot          *tgbotapi.BotAPI
 	log          *logger.Logger
+	db           *service.ServiceDB
 	startButtons tgbotapi.ReplyKeyboardMarkup
 	editPrompt   tgbotapi.InlineKeyboardMarkup
 	viewPrompt   tgbotapi.InlineKeyboardMarkup
 }
 
-func (b *ChatBot) Init(token string, l *logger.Logger) error {
+func NewChatBot(token string, l *logger.Logger, db *service.ServiceDB) (*ChatBot, error) {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		return fmt.Errorf("connect %w", err)
+		return nil, fmt.Errorf("connect %w", err)
 	}
 
-	b.bot = bot
-	b.log = l
+	b := ChatBot{
+		bot:          bot,
+		log:          l,
+		db:           db,
+		startButtons: tgbotapi.ReplyKeyboardMarkup{},
+		editPrompt:   tgbotapi.InlineKeyboardMarkup{},
+		viewPrompt:   tgbotapi.InlineKeyboardMarkup{},
+	}
 
 	b.generateButtons()
 	b.generateEditPrompt()
 	b.generateViewPrompt()
 
-	return nil
+	return &b, nil
 }
 
 func (b *ChatBot) generateButtons() {
@@ -53,7 +62,6 @@ func (b *ChatBot) generateButtons() {
 	)
 
 	b.startButtons = startBttns
-
 }
 
 func (b *ChatBot) generateEditPrompt() {

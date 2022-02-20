@@ -16,7 +16,7 @@ var Collection = newCollectionTable("public", "collection", "")
 type collectionTable struct {
 	postgres.Table
 
-	//Columns
+	// Columns
 	ID         postgres.ColumnInteger
 	OwnerID    postgres.ColumnInteger
 	AlbumID    postgres.ColumnInteger
@@ -62,7 +62,7 @@ func newCollectionTableImpl(schemaName, tableName, alias string) collectionTable
 	return collectionTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
-		//Columns
+		// Columns
 		ID:         IDColumn,
 		OwnerID:    OwnerIDColumn,
 		AlbumID:    AlbumIDColumn,
