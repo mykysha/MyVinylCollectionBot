@@ -3,6 +3,7 @@ package albums
 import (
 	"context"
 
+	db "github.com/nndergunov/tgBot/server/pkg/db/tgbot/public"
 	"github.com/nndergunov/tgBot/server/pkg/db/tgbot/public/model"
 )
 
