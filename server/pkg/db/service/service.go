@@ -7,17 +7,17 @@ import (
 	db "github.com/nndergunov/tgBot/server/pkg/db/tgbot/public"
 )
 
-type ServiceDB struct {
+type DB struct {
 	db *sql.DB
 }
 
-func NewDB(dbSource string) (*ServiceDB, error) {
+func NewDB(dbSource string) (*DB, error) {
 	database, err := db.NewDB(dbSource)
 	if err != nil {
 		return nil, fmt.Errorf("database open: %w", err)
 	}
 
-	return &ServiceDB{
+	return &DB{
 		db: database,
 	}, nil
 }

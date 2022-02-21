@@ -38,10 +38,10 @@ func main() {
 
 	database, err := db.NewDB(dbSource)
 	if err != nil {
-		l.Println(err)
+		log.Fatal(err)
 	}
 
-	token := os.Getenv("apitoken")
+	token := os.Getenv("APITOKEN")
 
 	bot, err := api.NewChatBot(token, botLogger, database)
 	if err != nil {

@@ -11,13 +11,13 @@ import (
 type ChatBot struct {
 	bot          *tgbotapi.BotAPI
 	log          *logger.Logger
-	db           *service.ServiceDB
+	db           *service.DB
 	startButtons tgbotapi.ReplyKeyboardMarkup
 	editPrompt   tgbotapi.InlineKeyboardMarkup
 	viewPrompt   tgbotapi.InlineKeyboardMarkup
 }
 
-func NewChatBot(token string, l *logger.Logger, db *service.ServiceDB) (*ChatBot, error) {
+func NewChatBot(token string, l *logger.Logger, db *service.DB) (*ChatBot, error) {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		return nil, fmt.Errorf("connect %w", err)
