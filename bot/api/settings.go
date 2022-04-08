@@ -4,43 +4,50 @@ import (
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/nndergunov/tgBot/server/pkg/db/service"
-	logger "github.com/nndergunov/tgBot/server/pkg/log"
+	logger "github.com/nndergunov/tgBot/bot/pkg/logger"
 )
 
 type ChatBot struct {
 	bot          *tgbotapi.BotAPI
 	log          *logger.Logger
-	db           *service.DB
 	startButtons tgbotapi.ReplyKeyboardMarkup
 	editPrompt   tgbotapi.InlineKeyboardMarkup
 	viewPrompt   tgbotapi.InlineKeyboardMarkup
 }
 
-func NewChatBot(token string, l *logger.Logger, db *service.DB) (*ChatBot, error) {
+func NewChatBot(token string, logger *logger.Logger) (*ChatBot, error) {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		return nil, fmt.Errorf("connect %w", err)
 	}
 
-	b := ChatBot{
-		bot:          bot,
-		log:          l,
-		db:           db,
-		startButtons: tgbotapi.ReplyKeyboardMarkup{},
-		editPrompt:   tgbotapi.InlineKeyboardMarkup{},
-		viewPrompt:   tgbotapi.InlineKeyboardMarkup{},
+	chatBot := ChatBot{
+		bot: bot,
+		log: logger,
+		startButtons: tgbotapi.ReplyKeyboardMarkup{
+			Keyboard:              nil,
+			ResizeKeyboard:        true,
+			OneTimeKeyboard:       false,
+			InputFieldPlaceholder: "Select a button",
+			Selective:             false,
+		},
+		editPrompt: tgbotapi.InlineKeyboardMarkup{
+			InlineKeyboard: nil,
+		},
+		viewPrompt: tgbotapi.InlineKeyboardMarkup{
+			InlineKeyboard: nil,
+		},
 	}
 
-	b.generateButtons()
-	b.generateEditPrompt()
-	b.generateViewPrompt()
+	chatBot.generateButtons()
+	chatBot.generateEditPrompt()
+	chatBot.generateViewPrompt()
 
-	return &b, nil
+	return &chatBot, nil
 }
 
 func (b *ChatBot) generateButtons() {
-	startBttns := tgbotapi.NewReplyKeyboard(
+	startButtons := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("View collection"),
 			tgbotapi.NewKeyboardButton("Edit collection"),
@@ -61,7 +68,7 @@ func (b *ChatBot) generateButtons() {
 		),
 	)
 
-	b.startButtons = startBttns
+	b.startButtons = startButtons
 }
 
 func (b *ChatBot) generateEditPrompt() {

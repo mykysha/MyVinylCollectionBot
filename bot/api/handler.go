@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -21,7 +20,7 @@ func (b *ChatBot) Handle() {
 			continue
 		}
 
-		b.logMessage(update.Message)
+		b.log.LogMessage(update.Message)
 
 		switch update.Message.Command() {
 		case "start":
@@ -42,7 +41,7 @@ func (b ChatBot) startHandler(update tgbotapi.Update) {
 	msg.ReplyMarkup = b.startButtons
 
 	if _, err := b.bot.Send(msg); err != nil {
-		b.log.ErrorLog(err)
+		b.log.Println("error", err)
 	}
 }
 
@@ -52,7 +51,7 @@ func (b ChatBot) helpHandler(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
 
 	if _, err := b.bot.Send(msg); err != nil {
-		b.log.ErrorLog(err)
+		b.log.Println("error", err)
 	}
 }
 
@@ -74,11 +73,11 @@ func (b ChatBot) otherHandler(update tgbotapi.Update) {
 }
 
 func (b ChatBot) textHandler(update tgbotapi.Update) {
-	text := fmt.Sprintf("I've recieved \"%s\"", update.Message.Text)
+	text := fmt.Sprintf("I've received \"%s\"", update.Message.Text)
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
 
 	if _, err := b.bot.Send(msg); err != nil {
-		log.Panic(err)
+		b.log.Panic(err)
 	}
 }
