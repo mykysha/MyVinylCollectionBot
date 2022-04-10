@@ -140,22 +140,33 @@ func NewPhoto(photoID string) *Photo {
 
 type Voice struct {
 	FileUniqueID string
-	Duration     int
+}
+
+func NewVoice(fileUniqueID string) *Voice {
+	return &Voice{FileUniqueID: fileUniqueID}
 }
 
 type VideoNote struct {
 	FileUniqueID string
-	Duration     int
+}
+
+func NewVideoNote(fileUniqueID string) *VideoNote {
+	return &VideoNote{FileUniqueID: fileUniqueID}
 }
 
 type Video struct {
 	FileUniqueID string
-	Duration     int64
-	Height       int64
-	Width        int64
+}
+
+func NewVideo(fileUniqueID string) *Video {
+	return &Video{FileUniqueID: fileUniqueID}
 }
 
 type Poll struct {
-	FileUniqueID string
-	Question     string
+	Question string
+	Options  []string
+}
+
+func NewPoll(question string, options []string) *Poll {
+	return &Poll{Question: question, Options: options}
 }

@@ -47,19 +47,3 @@ func (tg *TgBot) getUpdates() {
 		tg.MessageChan <- message
 	}
 }
-
-func (tg TgBot) parseToMessage(update tgbotapi.Update) domain.ReceiveMessage {
-	return domain.ReceiveMessage{
-		ChatID:    update.Message.Chat.ID,
-		Text:      update.Message.Text,
-		FirstName: update.Message.Chat.FirstName,
-		LastName:  update.Message.Chat.LastName,
-		UserName:  update.Message.Chat.UserName,
-		Time:      update.Message.Time(),
-		Photo:     nil,
-		Voice:     nil,
-		VideoNote: nil,
-		Video:     nil,
-		Poll:      nil,
-	}
-}
