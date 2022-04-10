@@ -18,7 +18,7 @@ func NewLogger(out io.Writer, prefix string) *Logger {
 
 // LogMessage prints telegram message to the log output.
 func (l Logger) LogMessage(msg any) {
-	l.Printf("\ninfo %#v", msg)
+	l.Printf("info %+v", msg)
 }
 
 // Println outputs data in similar to the fmt.Println way.

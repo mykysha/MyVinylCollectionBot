@@ -1,83 +1,30 @@
 package api
 
 import (
-	"fmt"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/nndergunov/tgBot/bot/pkg/domain"
 )
 
 func (b *ChatBot) Handle() {
-	b.bot.Debug = true
+	b.bot.Listen()
+	b.pool.Start()
 
-	updateConfig := tgbotapi.NewUpdate(0)
+	for message := range b.bot.MessageChan {
+		currMsg := message
 
-	updateConfig.Timeout = 30
+		b.log.LogMessage(currMsg)
 
-	updates := b.bot.GetUpdatesChan(updateConfig)
-
-	for update := range updates {
-		if update.Message == nil {
-			continue
+		handleTask := func() {
+			b.Respond(currMsg)
 		}
 
-		b.log.LogMessage(update.Message)
-
-		switch update.Message.Command() {
-		case "start":
-			go b.startHandler(update)
-		case "help":
-			go b.helpHandler(update)
-		default:
-			go b.otherHandler(update)
-		}
+		b.pool.AddTask(handleTask)
 	}
 }
 
-func (b ChatBot) startHandler(update tgbotapi.Update) {
-	text := fmt.Sprintf("%v, the bot had started successfully", update.Message.Chat.FirstName)
+func (b *ChatBot) Respond(message domain.ReceiveMessage) {
+	answer := b.router.Route(message)
 
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
-
-	msg.ReplyMarkup = b.startButtons
-
-	if _, err := b.bot.Send(msg); err != nil {
-		b.log.Println("error", err)
-	}
-}
-
-func (b ChatBot) helpHandler(update tgbotapi.Update) {
-	text := "help" // todo help handler.
-
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
-
-	if _, err := b.bot.Send(msg); err != nil {
-		b.log.Println("error", err)
-	}
-}
-
-func (b ChatBot) otherHandler(update tgbotapi.Update) {
-	switch {
-	case update.Message.Voice != nil:
-		b.voiceHandler(update)
-	case update.Message.VideoNote != nil:
-		b.videoNoteHandler(update)
-	case update.Message.Photo != nil:
-		b.photoHandler(update)
-	case update.Message.Video != nil:
-		b.videoHandler(update)
-	case update.Message.Poll != nil:
-		b.pollHandler(update)
-	case update.Message.Text != "":
-		b.textHandler(update)
-	}
-}
-
-func (b ChatBot) textHandler(update tgbotapi.Update) {
-	text := fmt.Sprintf("I've received \"%s\"", update.Message.Text)
-
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
-
-	if _, err := b.bot.Send(msg); err != nil {
-		b.log.Panic(err)
+	if err := b.bot.Send(answer); err != nil {
+		b.log.Println(err)
 	}
 }
