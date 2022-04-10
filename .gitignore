@@ -7,6 +7,7 @@ config.yaml
 
 ### Database creation file ###
 *.sql
+*.toml
 
 ### Go ###
 # Binaries for programs and plugins

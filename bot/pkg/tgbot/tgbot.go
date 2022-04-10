@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/nndergunov/tgBot/bot/pkg/domain"
+	"github.com/nndergunov/tgBot/bot/pkg/domain/messenger"
 )
 
 type TgBot struct {
-	MessageChan chan domain.ReceiveMessage
+	MessageChan chan messenger.ReceiveMessage
 	bot         *tgbotapi.BotAPI
 }
 
@@ -18,7 +18,7 @@ func NewTelegramBot(token string) (*TgBot, error) {
 		return nil, fmt.Errorf("NewTelegramBot: %w", err)
 	}
 
-	messageChan := make(chan domain.ReceiveMessage)
+	messageChan := make(chan messenger.ReceiveMessage)
 
 	return &TgBot{
 		MessageChan: messageChan,

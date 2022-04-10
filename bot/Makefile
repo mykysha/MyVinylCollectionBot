@@ -19,11 +19,15 @@ docker-stop:
 	docker container stop vinyl-bot
 
 update-gomod:
-	go get -u go get github.com/spf13/viper
+	make download-gomod
 	make gomod-tidy
 
 download-gomod:
-	go get go get github.com/spf13/viper
+	go get -u github.com/spf13/viper
+	go get -u github.com/volatiletech/sqlboiler/v4
+	go get -u github.com/volatiletech/null/v8
+	go get -u github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@latest
+	go get -u github.com/kat-co/vala
 
 gomod-tidy:
 	go mod tidy -go=1.18 -compat=1.18

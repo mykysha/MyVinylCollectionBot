@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/nndergunov/tgBot/bot/pkg/domain"
+	"github.com/nndergunov/tgBot/bot/pkg/domain/messenger"
 )
 
-func (tg TgBot) Send(messasge domain.SendMessage) error {
+func (tg TgBot) Send(messasge messenger.SendMessage) error {
 	var err error
 
 	if messasge.Photo != nil {
@@ -23,7 +23,7 @@ func (tg TgBot) Send(messasge domain.SendMessage) error {
 	return nil
 }
 
-func (tg TgBot) sendPhoto(messasge domain.SendMessage) error {
+func (tg TgBot) sendPhoto(messasge messenger.SendMessage) error {
 	msg := tgbotapi.NewPhoto(messasge.ChatID, tgbotapi.FileID(messasge.Photo.FileUniqueID))
 
 	if messasge.Text != "" {
@@ -45,7 +45,7 @@ func (tg TgBot) sendPhoto(messasge domain.SendMessage) error {
 	return nil
 }
 
-func (tg TgBot) sendText(messasge domain.SendMessage) error {
+func (tg TgBot) sendText(messasge messenger.SendMessage) error {
 	msg := tgbotapi.NewMessage(messasge.ChatID, messasge.Text)
 
 	if messasge.ReplyKeyboard != nil {

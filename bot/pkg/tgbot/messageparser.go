@@ -2,10 +2,10 @@ package tgbot
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/nndergunov/tgBot/bot/pkg/domain"
+	"github.com/nndergunov/tgBot/bot/pkg/domain/messenger"
 )
 
-func (tg TgBot) parseToMessage(update tgbotapi.Update) domain.ReceiveMessage {
+func (tg TgBot) parseToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 	switch {
 	case update.Message.Photo != nil:
 		return tg.photoToMessage(update)
@@ -22,12 +22,12 @@ func (tg TgBot) parseToMessage(update tgbotapi.Update) domain.ReceiveMessage {
 	}
 }
 
-func (tg TgBot) photoToMessage(update tgbotapi.Update) domain.ReceiveMessage {
+func (tg TgBot) photoToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 	bestQualityPhoto := len(update.Message.Photo) - 1
 
-	photo := domain.NewPhoto(update.Message.Photo[bestQualityPhoto].FileUniqueID)
+	photo := messenger.NewPhoto(update.Message.Photo[bestQualityPhoto].FileUniqueID)
 
-	return domain.ReceiveMessage{
+	return messenger.ReceiveMessage{
 		ChatID:    update.Message.Chat.ID,
 		Text:      update.Message.Caption,
 		FirstName: update.Message.Chat.FirstName,
@@ -42,10 +42,10 @@ func (tg TgBot) photoToMessage(update tgbotapi.Update) domain.ReceiveMessage {
 	}
 }
 
-func (tg TgBot) voiceToMessage(update tgbotapi.Update) domain.ReceiveMessage {
-	voice := domain.NewVoice(update.Message.Voice.FileUniqueID)
+func (tg TgBot) voiceToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
+	voice := messenger.NewVoice(update.Message.Voice.FileUniqueID)
 
-	return domain.ReceiveMessage{
+	return messenger.ReceiveMessage{
 		ChatID:    update.Message.Chat.ID,
 		Text:      update.Message.Caption,
 		FirstName: update.Message.Chat.FirstName,
@@ -60,10 +60,10 @@ func (tg TgBot) voiceToMessage(update tgbotapi.Update) domain.ReceiveMessage {
 	}
 }
 
-func (tg TgBot) videoNoteToMessage(update tgbotapi.Update) domain.ReceiveMessage {
-	videoNote := domain.NewVideoNote(update.Message.VideoNote.FileUniqueID)
+func (tg TgBot) videoNoteToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
+	videoNote := messenger.NewVideoNote(update.Message.VideoNote.FileUniqueID)
 
-	return domain.ReceiveMessage{
+	return messenger.ReceiveMessage{
 		ChatID:    update.Message.Chat.ID,
 		Text:      "",
 		FirstName: update.Message.Chat.FirstName,
@@ -78,10 +78,10 @@ func (tg TgBot) videoNoteToMessage(update tgbotapi.Update) domain.ReceiveMessage
 	}
 }
 
-func (tg TgBot) videoToMessage(update tgbotapi.Update) domain.ReceiveMessage {
-	video := domain.NewVideo(update.Message.Video.FileUniqueID)
+func (tg TgBot) videoToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
+	video := messenger.NewVideo(update.Message.Video.FileUniqueID)
 
-	return domain.ReceiveMessage{
+	return messenger.ReceiveMessage{
 		ChatID:    update.Message.Chat.ID,
 		Text:      update.Message.Caption,
 		FirstName: update.Message.Chat.FirstName,
@@ -96,7 +96,7 @@ func (tg TgBot) videoToMessage(update tgbotapi.Update) domain.ReceiveMessage {
 	}
 }
 
-func (tg TgBot) pollToMessage(update tgbotapi.Update) domain.ReceiveMessage {
+func (tg TgBot) pollToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 	tgOptions := update.Message.Poll.Options
 	options := make([]string, 0, len(tgOptions))
 
@@ -104,9 +104,9 @@ func (tg TgBot) pollToMessage(update tgbotapi.Update) domain.ReceiveMessage {
 		options = append(options, option.Text)
 	}
 
-	poll := domain.NewPoll(update.Message.Poll.Question, options)
+	poll := messenger.NewPoll(update.Message.Poll.Question, options)
 
-	return domain.ReceiveMessage{
+	return messenger.ReceiveMessage{
 		ChatID:    update.Message.Chat.ID,
 		Text:      "",
 		FirstName: update.Message.Chat.FirstName,
@@ -121,8 +121,8 @@ func (tg TgBot) pollToMessage(update tgbotapi.Update) domain.ReceiveMessage {
 	}
 }
 
-func (tg TgBot) textToMessage(update tgbotapi.Update) domain.ReceiveMessage {
-	return domain.ReceiveMessage{
+func (tg TgBot) textToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
+	return messenger.ReceiveMessage{
 		ChatID:    update.Message.Chat.ID,
 		Text:      update.Message.Text,
 		FirstName: update.Message.Chat.FirstName,

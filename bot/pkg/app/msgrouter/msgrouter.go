@@ -2,7 +2,7 @@ package msgrouter
 
 import (
 	"github.com/nndergunov/tgBot/bot/pkg/app/conversationer"
-	"github.com/nndergunov/tgBot/bot/pkg/domain"
+	"github.com/nndergunov/tgBot/bot/pkg/domain/messenger"
 )
 
 const (
@@ -26,13 +26,13 @@ func NewMsgRouter(communicator *conversationer.Conversationer) *MsgRouter {
 	}
 }
 
-func (r *MsgRouter) Route(msg domain.ReceiveMessage) domain.SendMessage {
+func (r *MsgRouter) Route(msg messenger.ReceiveMessage) messenger.SendMessage {
 	r.currentDialogue[msg.ChatID] = homeDialogue
 
 	return r.routeByType(msg)
 }
 
-func (r MsgRouter) routeByType(msg domain.ReceiveMessage) domain.SendMessage {
+func (r MsgRouter) routeByType(msg messenger.ReceiveMessage) messenger.SendMessage {
 	switch {
 	case msg.Voice != nil:
 		return r.communicator.VoiceResponser(msg)

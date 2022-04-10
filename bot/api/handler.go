@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/nndergunov/tgBot/bot/pkg/domain"
+	"github.com/nndergunov/tgBot/bot/pkg/domain/messenger"
 )
 
 func (b *ChatBot) Handle() {
@@ -21,7 +21,7 @@ func (b *ChatBot) Handle() {
 	}
 }
 
-func (b *ChatBot) Respond(message domain.ReceiveMessage) {
+func (b *ChatBot) Respond(message messenger.ReceiveMessage) {
 	answer := b.router.Route(message)
 
 	if err := b.bot.Send(answer); err != nil {

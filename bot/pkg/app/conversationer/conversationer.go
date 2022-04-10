@@ -1,6 +1,9 @@
 package conversationer
 
-import "github.com/nndergunov/tgBot/bot/pkg/domain"
+import (
+	"github.com/nndergunov/tgBot/bot/pkg/db"
+	"github.com/nndergunov/tgBot/bot/pkg/domain/answerer"
+)
 
 const (
 	StartKeyboardKey = "startKeyboard"
@@ -8,14 +11,18 @@ const (
 	ViewKeyboardKey  = "viewKeyboard"
 )
 
+const timeFormat = "02 Jan 06 15:04 MST"
+
 type Conversationer struct {
-	answers   domain.Answers
 	keyboards map[string][][]string
+	answers   answerer.Answers
+	database  *db.Database
 }
 
-func NewConver(answers domain.Answers, keyboards map[string][][]string) *Conversationer {
+func NewConver(database *db.Database, answers answerer.Answers, keyboards map[string][][]string) *Conversationer {
 	return &Conversationer{
-		answers:   answers,
 		keyboards: keyboards,
+		answers:   answers,
+		database:  database,
 	}
 }

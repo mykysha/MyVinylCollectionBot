@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/nndergunov/tgBot/bot/api"
 	"github.com/nndergunov/tgBot/bot/pkg/app/conversationer"
 	"github.com/nndergunov/tgBot/bot/pkg/app/msgrouter"
 	"github.com/nndergunov/tgBot/bot/pkg/configreader"
-	"github.com/nndergunov/tgBot/bot/pkg/domain"
+	"github.com/nndergunov/tgBot/bot/pkg/db"
+	"github.com/nndergunov/tgBot/bot/pkg/domain/answerer"
 	"github.com/nndergunov/tgBot/bot/pkg/logger"
 	"github.com/nndergunov/tgBot/bot/pkg/pooler"
 	"github.com/nndergunov/tgBot/bot/pkg/tgbot"
@@ -27,7 +29,10 @@ func main() {
 		mainLogger.Panicln(err)
 	}
 
-	communicator := createCommunicator()
+	communicator, err := createCommunicator()
+	if err != nil {
+		mainLogger.Panicln(err)
+	}
 
 	router := msgrouter.NewMsgRouter(communicator)
 
@@ -67,25 +72,45 @@ func createBot() (*tgbot.TgBot, error) {
 	return bot, nil
 }
 
-func createCommunicator() *conversationer.Conversationer {
+func createCommunicator() (*conversationer.Conversationer, error) {
+	dbURL := fmt.Sprintf(
+		"host=" + configreader.GetString("database.host") +
+			" port=" + configreader.GetString("database.port") +
+			" user=" + configreader.GetString("database.user") +
+			" password=" + configreader.GetString("database.password") +
+			" dbname=" + configreader.GetString("database.dbname") +
+			" sslmode=" + configreader.GetString("database.ssl"),
+	)
+
+	database, err := db.NewDatabase(dbURL)
+	if err != nil {
+		return nil, fmt.Errorf("createCommunicator: %w", err)
+	}
+
+	err = database.PutInfo(time.Now())
+	if err != nil {
+		return nil, fmt.Errorf("createCommunicator: %w", err)
+	}
+
 	answers := getAnswers()
 	keyboards := getKeyboards()
 
-	comm := conversationer.NewConver(answers, keyboards)
+	comm := conversationer.NewConver(database, answers, keyboards)
 
-	return comm
+	return comm, nil
 }
 
-func getAnswers() domain.Answers {
-	return domain.Answers{
-		Help:      configreader.GetString("answers.help"),
-		Voice:     configreader.GetString("answers.voice"),
-		VideoNote: configreader.GetString("answers.videoNote"),
-		Photo:     configreader.GetString("answers.photo"),
-		Video:     configreader.GetString("answers.video"),
-		Poll:      configreader.GetString("answers.poll"),
-		Unknown:   configreader.GetString("answers.unknown"),
-		BotInfo:   configreader.GetString("answers.botInfo"),
+func getAnswers() answerer.Answers {
+	return answerer.Answers{
+		Help:        configreader.GetString("answers.help"),
+		Voice:       configreader.GetString("answers.voice"),
+		VideoNote:   configreader.GetString("answers.videoNote"),
+		Photo:       configreader.GetString("answers.photo"),
+		Video:       configreader.GetString("answers.video"),
+		Poll:        configreader.GetString("answers.poll"),
+		Unsupported: configreader.GetString("answers.unsupported"),
+		Unknown:     configreader.GetString("answers.unknown"),
+		BotInfo:     configreader.GetString("answers.botInfo"),
 	}
 }
 

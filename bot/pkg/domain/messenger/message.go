@@ -1,4 +1,4 @@
-package domain
+package messenger
 
 import "time"
 
@@ -37,7 +37,7 @@ func MakeTextMessage(chatID int64, text string) SendMessage {
 	}
 }
 
-func MakeTextKeyboardMessage(chatID int64, text string, inline [][]string, reply [][]string) SendMessage {
+func MakeKeyedTextMessage(chatID int64, text string, inline [][]string, reply [][]string) SendMessage {
 	return SendMessage{
 		ChatID:         chatID,
 		Text:           text,
@@ -65,7 +65,7 @@ func MakePhotoMessage(chatID int64, text string, photo *Photo) SendMessage {
 	}
 }
 
-func MakePhotoKeyboardMessage(chatID int64, text string, photo *Photo, inline [][]string, reply [][]string) SendMessage {
+func MakeKeyedPhotoMessage(chatID int64, text string, photo *Photo, inline [][]string, reply [][]string) SendMessage {
 	return SendMessage{
 		ChatID:         chatID,
 		Text:           text,
