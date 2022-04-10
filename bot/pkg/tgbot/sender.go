@@ -8,52 +8,56 @@ import (
 )
 
 func (tg TgBot) Send(messasge domain.SendMessage) error {
+	var err error
+
+	if messasge.Photo != nil {
+		err = tg.sendPhoto(messasge)
+	} else {
+		err = tg.sendText(messasge)
+	}
+
+	if err != nil {
+		return fmt.Errorf("TgBot.Send: %w", err)
+	}
+
+	return nil
+}
+
+func (tg TgBot) sendPhoto(messasge domain.SendMessage) error {
+	msg := tgbotapi.NewPhoto(messasge.ChatID, tgbotapi.FileID(messasge.Photo.FileUniqueID))
+
+	if messasge.Text != "" {
+		msg.Caption = messasge.Text
+	}
+
+	if messasge.ReplyKeyboard != nil {
+		msg.ReplyMarkup = newReplyKeyboard(messasge.ReplyKeyboard)
+	}
+
+	if messasge.InlineKeyboard != nil {
+		msg.ReplyMarkup = newInlineKeyboard(messasge.ReplyKeyboard)
+	}
+
+	if _, err := tg.bot.Send(msg); err != nil {
+		return fmt.Errorf("SendTextMessage: %w", err)
+	}
+
+	return nil
+}
+
+func (tg TgBot) sendText(messasge domain.SendMessage) error {
 	msg := tgbotapi.NewMessage(messasge.ChatID, messasge.Text)
 
+	if messasge.ReplyKeyboard != nil {
+		msg.ReplyMarkup = newReplyKeyboard(messasge.ReplyKeyboard)
+	}
+
+	if messasge.InlineKeyboard != nil {
+		msg.ReplyMarkup = newInlineKeyboard(messasge.ReplyKeyboard)
+	}
+
 	if _, err := tg.bot.Send(msg); err != nil {
 		return fmt.Errorf("SendTextMessage: %w", err)
-	}
-
-	return nil
-}
-
-func (tg TgBot) sendTextMessage(toID int, messasge domain.SendMessage) error {
-	msg := tgbotapi.NewMessage(int64(toID), messasge.Text)
-
-	if _, err := tg.bot.Send(msg); err != nil {
-		return fmt.Errorf("SendTextMessage: %w", err)
-	}
-
-	return nil
-}
-
-func (tg TgBot) sendTextWithInlineKeyboard(toID int, message domain.SendMessage, keyboard [][]string) error {
-	kbrd := newInlineKeyboard(keyboard)
-
-	if err := tg.sendWithKeyboard(toID, message, kbrd); err != nil {
-		return fmt.Errorf("SendTextWithInlineKeyboard: %w", err)
-	}
-
-	return nil
-}
-
-func (tg TgBot) sendTextWithReplyKeyboard(toID int, message domain.SendMessage, keyboard [][]string) error {
-	kbrd := newReplyKeyboard(keyboard)
-
-	if err := tg.sendWithKeyboard(toID, message, kbrd); err != nil {
-		return fmt.Errorf("SendTextWithInlineKeyboard: %w", err)
-	}
-
-	return nil
-}
-
-func (tg TgBot) sendWithKeyboard(toID int, message domain.SendMessage, keyboard interface{}) error {
-	msg := tgbotapi.NewMessage(int64(toID), message.Text)
-
-	msg.ReplyMarkup = keyboard
-
-	if _, err := tg.bot.Send(msg); err != nil {
-		return fmt.Errorf("sendWithKeyboard: %w", err)
 	}
 
 	return nil
