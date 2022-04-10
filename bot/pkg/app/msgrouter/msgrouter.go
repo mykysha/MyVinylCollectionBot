@@ -6,7 +6,12 @@ import (
 )
 
 const (
-	homeDialogue = "home"
+	homeDialogue           = "home"
+	viewCollectionDialogue = "view collection"
+	editCollectionDialogue = "edit collection"
+	viewWishlistDialogue   = "view wishlist"
+	editWishlistDialogue   = "edit wishlist"
+	moveDialogue           = "move from wishlist to collection"
 )
 
 type MsgRouter struct {
@@ -27,10 +32,14 @@ func NewMsgRouter(communicator *conversationer.Conversationer) *MsgRouter {
 }
 
 func (r *MsgRouter) Route(msg messenger.ReceiveMessage) messenger.SendMessage {
-	r.currentDialogue[msg.ChatID] = homeDialogue
+	if _, ok := r.currentDialogue[msg.ChatID]; !ok {
+		r.currentDialogue[msg.ChatID] = homeDialogue
+	}
 
 	return r.routeByType(msg)
 }
+
+// todo
 
 func (r MsgRouter) routeByType(msg messenger.ReceiveMessage) messenger.SendMessage {
 	switch {

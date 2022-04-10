@@ -16,22 +16,28 @@ func (r MsgRouter) textRouter(msg messenger.ReceiveMessage) messenger.SendMessag
 func (r *MsgRouter) homeDialogue(msg messenger.ReceiveMessage) (answer messenger.SendMessage) {
 	switch msg.Text {
 	case "View collection":
+		r.currentDialogue[msg.ChatID] = viewCollectionDialogue
+
 		return r.communicator.ViewCollectionResponser(msg)
-		// TODO change home to viewCollection.
 	case "Edit collection":
+		r.currentDialogue[msg.ChatID] = editCollectionDialogue
+
 		return r.communicator.EditCollectionResponser(msg)
-		// TODO change home to editCollection.
 	case "View genres":
 		return r.communicator.ViewGenresResponser(msg)
 	case "View artists":
 		return r.communicator.ViewArtistsResponser(msg)
 	case "View wishlist":
+		r.currentDialogue[msg.ChatID] = viewWishlistDialogue
+
 		return r.communicator.ViewWishlistResponser(msg)
-		// TODO change home to viewWishlist.
 	case "Edit wishlist":
+		r.currentDialogue[msg.ChatID] = editWishlistDialogue
+
 		return r.communicator.EditWishlistResponser(msg)
-		// TODO change home to viewWishlist.
 	case "Move from wishlist to collection":
+		r.currentDialogue[msg.ChatID] = moveDialogue
+
 		return r.communicator.MoveResponser(msg)
 	case "Bot info":
 		return r.communicator.BotInfoResponser(msg)
