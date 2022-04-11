@@ -121,6 +121,8 @@ func getKeyboards() map[string][][]string {
 	keyboardMap[conversationer.StartKeyboardKey] = configreader.GetStringSliceOfSlices("keyboards.startKeyboard")
 	keyboardMap[conversationer.EditKeyboardKey] = configreader.GetStringSliceOfSlices("keyboards.editKeyboard")
 	keyboardMap[conversationer.ViewKeyboardKey] = configreader.GetStringSliceOfSlices("keyboards.viewKeyboard")
+	keyboardMap[conversationer.ExpandedViewKeyboardKey] = configreader.GetStringSliceOfSlices("keyboards.expandedView")
+	keyboardMap[conversationer.EditViewKeyboardKey] = configreader.GetStringSliceOfSlices("keyboards.editView")
 
 	return keyboardMap
 }

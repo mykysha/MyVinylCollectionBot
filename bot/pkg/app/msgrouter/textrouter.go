@@ -8,6 +8,8 @@ func (r MsgRouter) textRouter(msg messenger.ReceiveMessage) messenger.SendMessag
 	switch r.currentDialogue[msg.ChatID] {
 	case homeDialogue:
 		return r.homeDialogue(msg)
+	case viewCollectionDialogue:
+		return r.viewCollectionDialogue(msg)
 	case editCollectionDialogue:
 		return r.editCollectionDialogue(msg)
 	default:

@@ -6,9 +6,11 @@ import (
 )
 
 const (
-	StartKeyboardKey = "startKeyboard"
-	EditKeyboardKey  = "editKeyboard"
-	ViewKeyboardKey  = "viewKeyboard"
+	StartKeyboardKey        = "startKeyboard"
+	EditKeyboardKey         = "editKeyboard"
+	ViewKeyboardKey         = "viewKeyboard"
+	ExpandedViewKeyboardKey = "expandedView"
+	EditViewKeyboardKey     = "editView"
 )
 
 const timeFormat = "02 Jan 06 15:04 MST"

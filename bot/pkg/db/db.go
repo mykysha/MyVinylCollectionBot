@@ -73,3 +73,36 @@ func (d Database) AddAlbumToCollection(album entities.Album, location entities.L
 
 	return nil
 }
+
+func (d Database) GetCollection(userID int) ([]entities.Album, error) {
+	var albums []entities.Album
+
+	dbAlbums, err := d.db.GetCollection(userID)
+	if err != nil {
+		return nil, fmt.Errorf("GetCollection: %w", err)
+	}
+
+	for _, dbAlbum := range dbAlbums {
+		artist, err := d.db.GetArtistById(dbAlbum.ArtistID)
+		if err != nil {
+			return nil, fmt.Errorf("GetCollection: %w", err)
+		}
+
+		album := entities.Album{
+			Artist: entities.Artist{
+				Name: artist.Name.String,
+			},
+			Name:        dbAlbum.AlbumName.String,
+			Genre:       dbAlbum.Genre.String,
+			ReleaseYear: dbAlbum.ReleaseYear.Int,
+			ReissueYear: dbAlbum.ReissueYear.Int,
+			Label:       dbAlbum.Label.String,
+			Coloured:    dbAlbum.Coloured.Bool,
+			CoverID:     dbAlbum.CoverID.String,
+		}
+
+		albums = append(albums, album)
+	}
+
+	return albums, nil
+}
