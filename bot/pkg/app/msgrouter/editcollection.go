@@ -6,6 +6,8 @@ func (r *MsgRouter) editCollectionDialogue(msg messenger.ReceiveMessage) messeng
 	switch r.currentPosition[msg.ChatID] {
 	case receivingDetailsPos:
 		return r.editCollDetailsDialogue(msg)
+	case addingNewPos:
+		return r.addingNewDialogue(msg)
 	default:
 		return r.communicator.UnknownTypeResponser(msg)
 	}
@@ -38,5 +40,10 @@ func (r *MsgRouter) editCollDetailsDialogue(msg messenger.ReceiveMessage) messen
 func (r *MsgRouter) addingNewDialogue(msg messenger.ReceiveMessage) messenger.SendMessage {
 	success, resp := r.communicator.Adder(msg)
 
-	i
+	if success == true {
+		r.currentDialogue[msg.ChatID] = homeDialogue
+		r.currentPosition[msg.ChatID] = homePos
+	}
+
+	return resp
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/nndergunov/tgBot/bot/pkg/configreader"
 	"github.com/nndergunov/tgBot/bot/pkg/db"
 	"github.com/nndergunov/tgBot/bot/pkg/domain/answerer"
+	"github.com/nndergunov/tgBot/bot/pkg/domain/entities"
 	"github.com/nndergunov/tgBot/bot/pkg/logger"
 	"github.com/nndergunov/tgBot/bot/pkg/pooler"
 	"github.com/nndergunov/tgBot/bot/pkg/tgbot"
@@ -87,7 +88,7 @@ func createCommunicator() (*conversationer.Conversationer, error) {
 		return nil, fmt.Errorf("createCommunicator: %w", err)
 	}
 
-	err = database.PutInfo(time.Now())
+	err = database.PutInfo(entities.Info{Starttime: time.Now()})
 	if err != nil {
 		return nil, fmt.Errorf("createCommunicator: %w", err)
 	}

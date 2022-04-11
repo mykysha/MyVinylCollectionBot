@@ -40,6 +40,16 @@ func NewMsgRouter(communicator *conversationer.Conversationer) *MsgRouter {
 }
 
 func (r *MsgRouter) Route(msg messenger.ReceiveMessage) messenger.SendMessage {
+	switch msg.Text {
+	case "/start":
+		r.currentDialogue[msg.ChatID] = homeDialogue
+		r.currentPosition[msg.ChatID] = homePos
+
+		return r.communicator.StartResponser(msg)
+	case "/help":
+		return r.communicator.HelpResponser(msg)
+	}
+
 	if _, ok := r.currentDialogue[msg.ChatID]; !ok {
 		r.currentDialogue[msg.ChatID] = homeDialogue
 	}
@@ -64,13 +74,11 @@ func (r MsgRouter) routeByType(msg messenger.ReceiveMessage) messenger.SendMessa
 		return r.communicator.VoiceResponser(msg)
 	case msg.VideoNote != nil:
 		return r.communicator.VideoNoteResponser(msg)
-	case msg.Photo != nil:
-		return r.photoRouter(msg)
 	case msg.Video != nil:
 		return r.communicator.VideoResponser(msg)
 	case msg.Poll != nil:
 		return r.communicator.PollResponser(msg)
-	case msg.Text != "":
+	case msg.Text != "" || msg.Photo != nil:
 		return r.textRouter(msg)
 	default:
 		return r.communicator.UnknownTypeResponser(msg)

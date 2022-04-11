@@ -21,8 +21,8 @@ func (c Conversationer) EditCollectionResponser(msg messenger.ReceiveMessage) me
 
 func (c Conversationer) AddToCollectionResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
 	text := "Then send me cover of desired album with caption consisting of:\nName of the artist\nName of the album\n" +
-		"Genre\nOriginal release year\nYear of the album issue\nLabel\nWhether it is coloured or not (Yes/No)\n\n" +
-		"all in one line divided by commas."
+		"Genre\nOriginal release year\nYear of the album issue\nLabel\nWhether it is coloured or not (Yes/No)\n" +
+		"Location, in which the album is stored\n\nall in one line divided by commas."
 
 	return messenger.MakeTextMessage(msg.ChatID, text)
 }
@@ -36,10 +36,10 @@ func (c Conversationer) Adder(msg messenger.ReceiveMessage) (bool, messenger.Sen
 
 	caption := msg.Text
 	caption = strings.ReplaceAll(caption, ", ", ",")
-
 	args := strings.Split(caption, ",")
+	numOfArgs := 8
 
-	if len(args) != 7 {
+	if len(args) != numOfArgs {
 		text := "Looks like not all arguments are in place."
 
 		return false, messenger.MakeTextMessage(msg.ChatID, text)
@@ -61,7 +61,7 @@ func (c Conversationer) Adder(msg messenger.ReceiveMessage) (bool, messenger.Sen
 
 	isColoured := strings.ToLower(args[6]) == "yes"
 
-	_ = entities.Album{
+	album := entities.Album{
 		Artist: entities.Artist{
 			Name: args[0],
 		},
@@ -74,7 +74,23 @@ func (c Conversationer) Adder(msg messenger.ReceiveMessage) (bool, messenger.Sen
 		CoverID:     msg.Photo.FileUniqueID,
 	}
 
+	location := entities.Location{
+		Owner: entities.User{
+			ChatID:   int(msg.ChatID),
+			UserName: msg.UserName,
+		},
+		Name: args[7],
+	}
+
+	err = c.database.AddAlbumToCollection(album, location)
+	if err != nil {
+		text := "Some error working with database, try again later"
+
+		return true, messenger.MakeTextMessage(msg.ChatID, text)
+	}
+
 	text := "Added successfully!"
+
 	return true, messenger.MakeTextMessage(msg.ChatID, text)
 }
 
