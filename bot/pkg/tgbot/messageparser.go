@@ -7,6 +7,8 @@ import (
 
 func (tg TgBot) parseToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 	switch {
+	case update.CallbackQuery != nil:
+		return tg.callbackMessage(update)
 	case update.Message.Photo != nil:
 		return tg.photoToMessage(update)
 	case update.Message.Voice != nil:
@@ -129,6 +131,22 @@ func (tg TgBot) textToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 		LastName:  update.Message.Chat.LastName,
 		UserName:  update.Message.Chat.UserName,
 		Time:      update.Message.Time(),
+		Photo:     nil,
+		Voice:     nil,
+		VideoNote: nil,
+		Video:     nil,
+		Poll:      nil,
+	}
+}
+
+func (tg TgBot) callbackMessage(update tgbotapi.Update) messenger.ReceiveMessage {
+	return messenger.ReceiveMessage{
+		ChatID:    update.CallbackQuery.From.ID,
+		Text:      update.CallbackQuery.Data,
+		FirstName: update.CallbackQuery.From.FirstName,
+		LastName:  update.CallbackQuery.From.LastName,
+		UserName:  update.CallbackQuery.From.UserName,
+		Time:      update.CallbackQuery.Message.Time(),
 		Photo:     nil,
 		Voice:     nil,
 		VideoNote: nil,

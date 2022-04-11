@@ -35,7 +35,7 @@ func (tg TgBot) sendPhoto(messasge messenger.SendMessage) error {
 	}
 
 	if messasge.InlineKeyboard != nil {
-		msg.ReplyMarkup = newInlineKeyboard(messasge.ReplyKeyboard)
+		msg.ReplyMarkup = newInlineKeyboard(messasge.InlineKeyboard)
 	}
 
 	if _, err := tg.bot.Send(msg); err != nil {
@@ -53,7 +53,7 @@ func (tg TgBot) sendText(messasge messenger.SendMessage) error {
 	}
 
 	if messasge.InlineKeyboard != nil {
-		msg.ReplyMarkup = newInlineKeyboard(messasge.ReplyKeyboard)
+		msg.ReplyMarkup = newInlineKeyboard(messasge.InlineKeyboard)
 	}
 
 	if _, err := tg.bot.Send(msg); err != nil {

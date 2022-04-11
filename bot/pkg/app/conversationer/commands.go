@@ -42,8 +42,14 @@ func (c Conversationer) ViewArtistsResponser(msg messenger.ReceiveMessage) messe
 	return messenger.SendMessage{}
 }
 
-func (c Conversationer) UnsupportedResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
-	text := c.answers.Unsupported
+func (c Conversationer) BackResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
+	text := "Ok, returning you back"
+
+	return messenger.MakeTextMessage(msg.ChatID, text)
+}
+
+func (c Conversationer) TakeHomeResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
+	text := "Ok, returning you to start menu"
 
 	return messenger.MakeTextMessage(msg.ChatID, text)
 }

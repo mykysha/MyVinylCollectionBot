@@ -38,7 +38,7 @@ func (tg *TgBot) getUpdates() {
 	updates := tg.bot.GetUpdatesChan(updateConfig)
 
 	for update := range updates {
-		if update.Message == nil {
+		if update.Message == nil && update.CallbackQuery == nil {
 			continue
 		}
 

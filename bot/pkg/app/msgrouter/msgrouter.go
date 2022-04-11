@@ -14,6 +14,14 @@ const (
 	moveDialogue           = "move from wishlist to collection"
 )
 
+const (
+	homePos             = "home"
+	receivingDetailsPos = "receiving details"
+	addingNewPos        = "adding new"
+	editingPos          = "editing"
+	deletingPos         = "deleting"
+)
+
 type MsgRouter struct {
 	currentDialogue map[int64]string
 	currentPosition map[int64]string
@@ -36,10 +44,19 @@ func (r *MsgRouter) Route(msg messenger.ReceiveMessage) messenger.SendMessage {
 		r.currentDialogue[msg.ChatID] = homeDialogue
 	}
 
+	if _, ok := r.currentPosition[msg.ChatID]; !ok {
+		r.currentPosition[msg.ChatID] = homePos
+	}
+
+	if msg.Text == "Take me home!" {
+		r.currentDialogue[msg.ChatID] = homeDialogue
+		r.currentPosition[msg.ChatID] = homePos
+
+		return r.communicator.TakeHomeResponser(msg)
+	}
+
 	return r.routeByType(msg)
 }
-
-// todo
 
 func (r MsgRouter) routeByType(msg messenger.ReceiveMessage) messenger.SendMessage {
 	switch {

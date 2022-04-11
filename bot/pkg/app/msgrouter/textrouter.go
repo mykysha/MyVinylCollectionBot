@@ -8,6 +8,8 @@ func (r MsgRouter) textRouter(msg messenger.ReceiveMessage) messenger.SendMessag
 	switch r.currentDialogue[msg.ChatID] {
 	case homeDialogue:
 		return r.homeDialogue(msg)
+	case editCollectionDialogue:
+		return r.editCollectionDialogue(msg)
 	default:
 		return r.communicator.UnknownTypeResponser(msg)
 	}
@@ -21,6 +23,7 @@ func (r *MsgRouter) homeDialogue(msg messenger.ReceiveMessage) (answer messenger
 		return r.communicator.ViewCollectionResponser(msg)
 	case "Edit collection":
 		r.currentDialogue[msg.ChatID] = editCollectionDialogue
+		r.currentPosition[msg.ChatID] = receivingDetailsPos
 
 		return r.communicator.EditCollectionResponser(msg)
 	case "View genres":
@@ -33,6 +36,7 @@ func (r *MsgRouter) homeDialogue(msg messenger.ReceiveMessage) (answer messenger
 		return r.communicator.ViewWishlistResponser(msg)
 	case "Edit wishlist":
 		r.currentDialogue[msg.ChatID] = editWishlistDialogue
+		r.currentPosition[msg.ChatID] = receivingDetailsPos
 
 		return r.communicator.EditWishlistResponser(msg)
 	case "Move from wishlist to collection":

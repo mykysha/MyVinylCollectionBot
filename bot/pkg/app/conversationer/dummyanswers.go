@@ -39,3 +39,9 @@ func (c Conversationer) UnknownTypeResponser(msg messenger.ReceiveMessage) messe
 
 	return messenger.MakeTextMessage(msg.ChatID, text)
 }
+
+func (c Conversationer) UnsupportedResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
+	text := c.answers.Unsupported
+
+	return messenger.MakeTextMessage(msg.ChatID, text)
+}
