@@ -2,7 +2,7 @@ package conversationer
 
 import (
 	"fmt"
-	"log"
+	"strings"
 
 	"github.com/nndergunov/tgBot/bot/pkg/domain/messenger"
 )
@@ -24,7 +24,9 @@ func (c Conversationer) HelpResponser(msg messenger.ReceiveMessage) messenger.Se
 func (c Conversationer) BotInfoResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
 	startTime, err := c.database.GetInfo()
 	if err != nil {
-		log.Println(err)
+		text := "Some error working with database, try again later"
+
+		return messenger.MakeTextMessage(msg.ChatID, text)
 	}
 
 	text := fmt.Sprintf("%s\nBot Start time: %v", c.answers.BotInfo, startTime.Starttime.Format(timeFormat))
@@ -33,13 +35,41 @@ func (c Conversationer) BotInfoResponser(msg messenger.ReceiveMessage) messenger
 }
 
 func (c Conversationer) ViewGenresResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
-	// TODO logic.
-	return messenger.SendMessage{}
+	genres, err := c.database.GetGenres(int(msg.ChatID))
+	if err != nil {
+		text := "Some error working with database, try again later"
+
+		return messenger.MakeTextMessage(msg.ChatID, text)
+	}
+
+	var text string
+
+	for i := 0; i < len(genres); i++ {
+		text += fmt.Sprintf("%d. %s\n", i+1, genres[i])
+	}
+
+	text = strings.TrimRight(text, "\n")
+
+	return messenger.MakeTextMessage(msg.ChatID, text)
 }
 
 func (c Conversationer) ViewArtistsResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
-	// TODO logic.
-	return messenger.SendMessage{}
+	artists, err := c.database.GetArtists(int(msg.ChatID))
+	if err != nil {
+		text := "Some error working with database, try again later"
+
+		return messenger.MakeTextMessage(msg.ChatID, text)
+	}
+
+	var text string
+
+	for i := 0; i < len(artists); i++ {
+		text += fmt.Sprintf("%d. %s\n", i+1, artists[i].Name)
+	}
+
+	text = strings.TrimRight(text, "\n")
+
+	return messenger.MakeTextMessage(msg.ChatID, text)
 }
 
 func (c Conversationer) BackResponser(msg messenger.ReceiveMessage) messenger.SendMessage {

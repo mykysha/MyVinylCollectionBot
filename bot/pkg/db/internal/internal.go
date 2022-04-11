@@ -151,6 +151,20 @@ func (d DB) GetUserLocations(userID int) (models.LocationSlice, error) {
 	return locations, nil
 }
 
+func (d DB) GetLocationByName(locationName string, userID int) (*models.Location, error) {
+	userInTable, err := d.GetUserInTable(userID)
+	if err != nil {
+		return nil, fmt.Errorf("GetUserLocations: %w", err)
+	}
+
+	locations, err := models.Locations(qm.Where("user_id=? and name=?", userInTable, locationName)).One(d.ctx, d.db)
+	if err != nil {
+		return nil, fmt.Errorf("GetUserLocations: %w", err)
+	}
+
+	return locations, nil
+}
+
 func (d DB) InsertLocation(locationName string, userID int) error {
 	userInTable, err := d.GetUserInTable(userID)
 	if err != nil {
@@ -185,23 +199,6 @@ func (d DB) GetLocationInTable(locationName string, userID int) (int, error) {
 	}
 
 	return location.ID, nil
-}
-
-func (d DB) GetAllUserLocations(userID int) (models.LocationSlice, error) {
-	userInTable, err := d.GetUserInTable(userID)
-	if err != nil {
-		return nil, fmt.Errorf("GetLocationInTable: %w", err)
-	}
-
-	locations, err := models.Locations(qm.Where("user_id=?", userInTable)).All(
-		d.ctx,
-		d.db,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("GetLocationInTable: %w", err)
-	}
-
-	return locations, nil
 }
 
 func (d DB) AddAlbumToCollection(album entities.Album, locationName string, userID int) error {
@@ -284,7 +281,7 @@ func (d DB) GetArtistInTable(artistName string) (int, error) {
 	return artist.ID, nil
 }
 
-func (d DB) GetArtistById(artistID null.Int) (*models.Artist, error) {
+func (d DB) GetArtistByID(artistID null.Int) (*models.Artist, error) {
 	artist, err := models.Artists(qm.Where("id=?", artistID)).One(d.ctx, d.db)
 	if err != nil {
 		return nil, fmt.Errorf("GetUserInTable: %w", err)
@@ -371,7 +368,7 @@ func (d DB) GetAlbumsByLocation(locationInTable int) (models.AlbumSlice, error) 
 func (d DB) GetCollection(userID int) (models.AlbumSlice, error) {
 	var albums models.AlbumSlice
 
-	locations, err := d.GetAllUserLocations(userID)
+	locations, err := d.GetUserLocations(userID)
 	if err != nil {
 		return nil, fmt.Errorf("GetCollection: %w", err)
 	}

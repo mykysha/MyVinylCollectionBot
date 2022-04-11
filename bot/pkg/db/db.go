@@ -83,7 +83,7 @@ func (d Database) GetCollection(userID int) ([]entities.Album, error) {
 	}
 
 	for _, dbAlbum := range dbAlbums {
-		artist, err := d.db.GetArtistById(dbAlbum.ArtistID)
+		artist, err := d.db.GetArtistByID(dbAlbum.ArtistID)
 		if err != nil {
 			return nil, fmt.Errorf("GetCollection: %w", err)
 		}
@@ -105,4 +105,54 @@ func (d Database) GetCollection(userID int) ([]entities.Album, error) {
 	}
 
 	return albums, nil
+}
+
+func (d Database) GetGenres(userID int) ([]string, error) {
+	var genres []string
+
+	dbAlbums, err := d.db.GetCollection(userID)
+	if err != nil {
+		return nil, fmt.Errorf("GetCollection: %w", err)
+	}
+
+	for _, dbAlbum := range dbAlbums {
+		genres = append(genres, dbAlbum.Genre.String)
+	}
+
+	return genres, nil
+}
+
+func (d Database) GetArtists(userID int) ([]entities.Artist, error) {
+	var artists []entities.Artist
+
+	dbAlbums, err := d.db.GetCollection(userID)
+	if err != nil {
+		return nil, fmt.Errorf("GetCollection: %w", err)
+	}
+
+	for _, dbAlbum := range dbAlbums {
+		artist, err := d.db.GetArtistByID(dbAlbum.ArtistID)
+		if err != nil {
+			return nil, fmt.Errorf("GetCollection: %w", err)
+		}
+
+		artists = append(artists, entities.Artist{Name: artist.Name.String})
+	}
+
+	return artists, nil
+}
+
+func (d Database) GetLocationByName(locationName string, userID int, userName string) (entities.Location, error) {
+	loc, err := d.db.GetLocationByName(locationName, userID)
+	if err != nil {
+		return entities.Location{}, fmt.Errorf("GetLocationByName: %w", err)
+	}
+
+	return entities.Location{
+		Owner: entities.User{
+			ChatID:   userID,
+			UserName: userName,
+		},
+		Name: loc.Name.String,
+	}, nil
 }

@@ -20,6 +20,8 @@ const (
 	addingNewPos        = "adding new"
 	editingPos          = "editing"
 	deletingPos         = "deleting"
+	shownPos            = "shown albums"
+	shownFullPos        = "shown full album"
 )
 
 type MsgRouter struct {
