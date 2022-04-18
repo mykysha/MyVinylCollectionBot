@@ -35,30 +35,30 @@ func (c Conversationer) ExpandingResponser(msg messenger.ReceiveMessage) messeng
 	return messenger.MakeTextMessage(msg.ChatID, text)
 }
 
-func (c Conversationer) ShowingFullResponser(msg messenger.ReceiveMessage) (bool, messenger.SendMessage) {
+func (c Conversationer) ShowingFullResponser(msg messenger.ReceiveMessage) (bool, int, messenger.SendMessage) {
 	id, err := strconv.Atoi(msg.Text)
 	if err != nil {
 		text := "ID should be integer, like '1', '2', '3'"
 
-		return false, messenger.MakeTextMessage(msg.ChatID, text)
+		return false, 0, messenger.MakeTextMessage(msg.ChatID, text)
 	}
 
 	albums, err := c.database.GetCollection(int(msg.ChatID))
 	if err != nil {
-		text := "Some error working with database, try again later"
+		text := "Could not find your collection. Are you sure you have it?"
 
-		return false, messenger.MakeTextMessage(msg.ChatID, text)
+		return false, 0, messenger.MakeTextMessage(msg.ChatID, text)
 	}
 
 	if id > len(albums) || id <= 0 {
 		text := "ID should be integer from the list."
 
-		return false, messenger.MakeTextMessage(msg.ChatID, text)
+		return false, 0, messenger.MakeTextMessage(msg.ChatID, text)
 	}
 
 	album := albums[id-1]
 
-	text := fmt.Sprintf("Name: %s, Artist: %s, Genre: %s, Label: %s, Release Year: %s, Reissue Year: %s",
+	text := fmt.Sprintf("Name: %s, Artist: %s, Genre: %s, Label: %s, Release Year: %d, Reissue Year: %d",
 		album.Name, album.Artist, album.Genre, album.Label, album.ReleaseYear, album.ReissueYear)
 
 	if album.Coloured {
@@ -67,5 +67,5 @@ func (c Conversationer) ShowingFullResponser(msg messenger.ReceiveMessage) (bool
 
 	photo := messenger.NewPhoto(album.CoverID)
 
-	return true, messenger.MakeKeyedPhotoMessage(msg.ChatID, text, photo, c.keyboards[ExpandedViewKeyboardKey], nil)
+	return true, id, messenger.MakeKeyedPhotoMessage(msg.ChatID, text, photo, c.keyboards[EditViewKeyboardKey], nil)
 }

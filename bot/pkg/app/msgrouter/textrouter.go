@@ -22,7 +22,7 @@ func (r *MsgRouter) homeDialogue(msg messenger.ReceiveMessage) (answer messenger
 	case "View collection":
 		r.currentDialogue[msg.ChatID] = viewCollectionDialogue
 
-		return r.communicator.ViewCollectionResponser(msg)
+		return r.viewCollectionDialogue(msg)
 	case "Edit collection":
 		r.currentDialogue[msg.ChatID] = editCollectionDialogue
 		r.currentPosition[msg.ChatID] = receivingDetailsPos
@@ -32,19 +32,6 @@ func (r *MsgRouter) homeDialogue(msg messenger.ReceiveMessage) (answer messenger
 		return r.communicator.ViewGenresResponser(msg)
 	case "View artists":
 		return r.communicator.ViewArtistsResponser(msg)
-	case "View wishlist":
-		r.currentDialogue[msg.ChatID] = viewWishlistDialogue
-
-		return r.communicator.ViewWishlistResponser(msg)
-	case "Edit wishlist":
-		r.currentDialogue[msg.ChatID] = editWishlistDialogue
-		r.currentPosition[msg.ChatID] = receivingDetailsPos
-
-		return r.communicator.EditWishlistResponser(msg)
-	case "Move from wishlist to collection":
-		r.currentDialogue[msg.ChatID] = moveDialogue
-
-		return r.communicator.MoveResponser(msg)
 	case "Bot info":
 		return r.communicator.BotInfoResponser(msg)
 	default:

@@ -384,3 +384,28 @@ func (d DB) GetCollection(userID int) (models.AlbumSlice, error) {
 
 	return albums, nil
 }
+
+func (d DB) DeleteAlbum(userID int, albumID int) error {
+	var albumIDList models.CollectionSlice
+
+	locations, err := d.GetUserLocations(userID)
+	if err != nil {
+		return fmt.Errorf("DeleteAlbum: %w", err)
+	}
+
+	for _, location := range locations {
+		albumInLocList, err := models.Collections(qm.Where("location_id=?", location.ID)).All(d.ctx, d.db)
+		if err != nil {
+			return fmt.Errorf("DeleteAlbum: %w", err)
+		}
+
+		albumIDList = append(albumIDList, albumInLocList...)
+	}
+	
+	_, err = albumIDList[albumID].Delete(d.ctx, d.db)
+	if err != nil {
+		return fmt.Errorf("DeleteAlbum: %w", err)
+	}
+
+	return nil
+}

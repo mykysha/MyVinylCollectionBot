@@ -9,17 +9,12 @@ const (
 	homeDialogue           = "home"
 	viewCollectionDialogue = "view collection"
 	editCollectionDialogue = "edit collection"
-	viewWishlistDialogue   = "view wishlist"
-	editWishlistDialogue   = "edit wishlist"
-	moveDialogue           = "move from wishlist to collection"
 )
 
 const (
 	homePos             = "home"
 	receivingDetailsPos = "receiving details"
 	addingNewPos        = "adding new"
-	editingPos          = "editing"
-	deletingPos         = "deleting"
 	shownPos            = "shown albums"
 	shownFullPos        = "shown full album"
 )
@@ -27,16 +22,19 @@ const (
 type MsgRouter struct {
 	currentDialogue map[int64]string
 	currentPosition map[int64]string
+	currentAlbum    map[int64]int
 	communicator    *conversationer.Conversationer
 }
 
 func NewMsgRouter(communicator *conversationer.Conversationer) *MsgRouter {
 	currDialogue := make(map[int64]string)
 	currPos := make(map[int64]string)
+	currAlbum := make(map[int64]int)
 
 	return &MsgRouter{
 		currentDialogue: currDialogue,
 		currentPosition: currPos,
+		currentAlbum:    currAlbum,
 		communicator:    communicator,
 	}
 }
@@ -67,7 +65,10 @@ func (r *MsgRouter) Route(msg messenger.ReceiveMessage) messenger.SendMessage {
 		return r.communicator.TakeHomeResponser(msg)
 	}
 
-	return r.routeByType(msg)
+	resp := r.routeByType(msg)
+	resp = r.communicator.AddHome(resp)
+
+	return resp
 }
 
 func (r MsgRouter) routeByType(msg messenger.ReceiveMessage) messenger.SendMessage {

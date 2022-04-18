@@ -81,5 +81,5 @@ func (c Conversationer) BackResponser(msg messenger.ReceiveMessage) messenger.Se
 func (c Conversationer) TakeHomeResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
 	text := "Ok, returning you to start menu"
 
-	return messenger.MakeTextMessage(msg.ChatID, text)
+	return messenger.MakeKeyedTextMessage(msg.ChatID, text, nil, c.keyboards[StartKeyboardKey])
 }

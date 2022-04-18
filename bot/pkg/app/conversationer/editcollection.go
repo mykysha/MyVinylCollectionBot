@@ -94,10 +94,28 @@ func (c Conversationer) Adder(msg messenger.ReceiveMessage) (bool, messenger.Sen
 	return true, messenger.MakeTextMessage(msg.ChatID, text)
 }
 
-func (c Conversationer) EditInCollectionResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
-	return messenger.SendMessage{}
+func (c Conversationer) DeletingFromCollectionResponser(msg messenger.ReceiveMessage, curAlbum int) messenger.SendMessage {
+	err := c.database.DeleteAlbum(curAlbum, int(msg.ChatID))
+	if err != nil {
+		text := "Some error working with database, try again later"
+
+		return messenger.MakeTextMessage(msg.ChatID, text)
+	}
+
+	text := "Deleted successfully!"
+
+	return messenger.MakeTextMessage(msg.ChatID, text)
 }
 
-func (c Conversationer) DeletingFromCollectionResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
-	return messenger.SendMessage{}
+func (c Conversationer) EditInCollectionResponser(msg messenger.ReceiveMessage, curAlbum int) (bool, messenger.SendMessage) {
+	err := c.database.DeleteAlbum(curAlbum, int(msg.ChatID))
+	if err != nil {
+		text := "Some error working with database, try again later"
+
+		return false, messenger.MakeTextMessage(msg.ChatID, text)
+	}
+
+	text := "Deleted successfully!"
+
+	return true, messenger.MakeTextMessage(msg.ChatID, text)
 }

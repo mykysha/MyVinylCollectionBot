@@ -19,14 +19,6 @@ func (r *MsgRouter) editCollDetailsDialogue(msg messenger.ReceiveMessage) messen
 		r.currentPosition[msg.ChatID] = addingNewPos
 
 		return r.communicator.AddToCollectionResponser(msg)
-	case "Choose which to edit":
-		r.currentPosition[msg.ChatID] = editingPos
-
-		return r.communicator.EditInCollectionResponser(msg)
-	case "Delete":
-		r.currentPosition[msg.ChatID] = deletingPos
-
-		return r.communicator.DeletingFromCollectionResponser(msg)
 	case "Back":
 		r.currentDialogue[msg.ChatID] = homeDialogue
 		r.currentPosition[msg.ChatID] = homePos
@@ -46,4 +38,23 @@ func (r *MsgRouter) addingNewDialogue(msg messenger.ReceiveMessage) messenger.Se
 	}
 
 	return resp
+}
+
+func (r *MsgRouter) editOneDialogue(msg messenger.ReceiveMessage) messenger.SendMessage {
+	switch msg.Text {
+	case "Delete":
+		return r.communicator.DeletingFromCollectionResponser(msg, r.currentAlbum[msg.ChatID])
+	case "Edit info":
+		res, resp := r.communicator.EditInCollectionResponser(msg, r.currentAlbum[msg.ChatID])
+		if !res {
+			return resp
+		}
+
+		r.currentDialogue[msg.ChatID] = editCollectionDialogue
+		r.currentPosition[msg.ChatID] = addingNewPos
+
+		return r.communicator.AddToCollectionResponser(msg)
+	default:
+		return r.communicator.UnknownTypeResponser(msg)
+	}
 }

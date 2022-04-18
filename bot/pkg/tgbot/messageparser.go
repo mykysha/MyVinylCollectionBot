@@ -27,7 +27,7 @@ func (tg TgBot) parseToMessage(update tgbotapi.Update) messenger.ReceiveMessage 
 func (tg TgBot) photoToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 	bestQualityPhoto := len(update.Message.Photo) - 1
 
-	photo := messenger.NewPhoto(update.Message.Photo[bestQualityPhoto].FileUniqueID)
+	photo := messenger.NewPhoto(update.Message.Photo[bestQualityPhoto].FileID)
 
 	return messenger.ReceiveMessage{
 		ChatID:    update.Message.Chat.ID,
@@ -67,7 +67,7 @@ func (tg TgBot) videoNoteToMessage(update tgbotapi.Update) messenger.ReceiveMess
 
 	return messenger.ReceiveMessage{
 		ChatID:    update.Message.Chat.ID,
-		Text:      "",
+		Text:      update.Message.Caption,
 		FirstName: update.Message.Chat.FirstName,
 		LastName:  update.Message.Chat.LastName,
 		UserName:  update.Message.Chat.UserName,

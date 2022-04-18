@@ -156,3 +156,12 @@ func (d Database) GetLocationByName(locationName string, userID int, userName st
 		Name: loc.Name.String,
 	}, nil
 }
+
+func (d Database) DeleteAlbum(albumNumber int, userID int) error {
+	err := d.db.DeleteAlbum(userID, albumNumber-1)
+	if err != nil {
+		return fmt.Errorf("GetCollection: %w", err)
+	}
+
+	return nil
+}
