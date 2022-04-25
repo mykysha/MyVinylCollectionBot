@@ -4,7 +4,6 @@
 package models
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"reflect"
@@ -14,7 +13,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,9 +22,9 @@ import (
 
 // Location is an object representing the database table.
 type Location struct {
-	ID     int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID null.Int    `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
-	Name   null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
+	ID     int    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UserID int    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	Name   string `boil:"name" json:"name" toml:"name" yaml:"name"`
 
 	R *locationR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L locationL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -56,12 +54,12 @@ var LocationTableColumns = struct {
 
 var LocationWhere = struct {
 	ID     whereHelperint
-	UserID whereHelpernull_Int
-	Name   whereHelpernull_String
+	UserID whereHelperint
+	Name   whereHelperstring
 }{
 	ID:     whereHelperint{field: "\"locations\".\"id\""},
-	UserID: whereHelpernull_Int{field: "\"locations\".\"user_id\""},
-	Name:   whereHelpernull_String{field: "\"locations\".\"name\""},
+	UserID: whereHelperint{field: "\"locations\".\"user_id\""},
+	Name:   whereHelperstring{field: "\"locations\".\"name\""},
 }
 
 // LocationRels is where relationship names are stored.
@@ -89,8 +87,8 @@ type locationL struct{}
 
 var (
 	locationAllColumns            = []string{"id", "user_id", "name"}
-	locationColumnsWithoutDefault = []string{}
-	locationColumnsWithDefault    = []string{"id", "user_id", "name"}
+	locationColumnsWithoutDefault = []string{"user_id", "name"}
+	locationColumnsWithDefault    = []string{"id"}
 	locationPrimaryKeyColumns     = []string{"id"}
 	locationGeneratedColumns      = []string{}
 )
@@ -100,7 +98,7 @@ type (
 	// This should almost always be used instead of []Location.
 	LocationSlice []*Location
 	// LocationHook is the signature for custom Location hook methods
-	LocationHook func(context.Context, boil.ContextExecutor, *Location) error
+	LocationHook func(boil.Executor, *Location) error
 
 	locationQuery struct {
 		*queries.Query
@@ -143,13 +141,9 @@ var locationBeforeUpsertHooks []LocationHook
 var locationAfterUpsertHooks []LocationHook
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *Location) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Location) doAfterSelectHooks(exec boil.Executor) (err error) {
 	for _, hook := range locationAfterSelectHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -158,13 +152,9 @@ func (o *Location) doAfterSelectHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *Location) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Location) doBeforeInsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range locationBeforeInsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -173,13 +163,9 @@ func (o *Location) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExe
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *Location) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Location) doAfterInsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range locationAfterInsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -188,13 +174,9 @@ func (o *Location) doAfterInsertHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *Location) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Location) doBeforeUpdateHooks(exec boil.Executor) (err error) {
 	for _, hook := range locationBeforeUpdateHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -203,13 +185,9 @@ func (o *Location) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExe
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *Location) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Location) doAfterUpdateHooks(exec boil.Executor) (err error) {
 	for _, hook := range locationAfterUpdateHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -218,13 +196,9 @@ func (o *Location) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *Location) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Location) doBeforeDeleteHooks(exec boil.Executor) (err error) {
 	for _, hook := range locationBeforeDeleteHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -233,13 +207,9 @@ func (o *Location) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExe
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *Location) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Location) doAfterDeleteHooks(exec boil.Executor) (err error) {
 	for _, hook := range locationAfterDeleteHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -248,13 +218,9 @@ func (o *Location) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *Location) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Location) doBeforeUpsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range locationBeforeUpsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -263,13 +229,9 @@ func (o *Location) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExe
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *Location) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Location) doAfterUpsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range locationAfterUpsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -302,12 +264,12 @@ func AddLocationHook(hookPoint boil.HookPoint, locationHook LocationHook) {
 }
 
 // One returns a single location record from the query.
-func (q locationQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Location, error) {
+func (q locationQuery) One(exec boil.Executor) (*Location, error) {
 	o := &Location{}
 
 	queries.SetLimit(q.Query, 1)
 
-	err := q.Bind(ctx, exec, o)
+	err := q.Bind(nil, exec, o)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
@@ -315,7 +277,7 @@ func (q locationQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Loc
 		return nil, errors.Wrap(err, "models: failed to execute a one query for locations")
 	}
 
-	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
+	if err := o.doAfterSelectHooks(exec); err != nil {
 		return o, err
 	}
 
@@ -323,17 +285,17 @@ func (q locationQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Loc
 }
 
 // All returns all Location records from the query.
-func (q locationQuery) All(ctx context.Context, exec boil.ContextExecutor) (LocationSlice, error) {
+func (q locationQuery) All(exec boil.Executor) (LocationSlice, error) {
 	var o []*Location
 
-	err := q.Bind(ctx, exec, &o)
+	err := q.Bind(nil, exec, &o)
 	if err != nil {
 		return nil, errors.Wrap(err, "models: failed to assign all query results to Location slice")
 	}
 
 	if len(locationAfterSelectHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
+			if err := obj.doAfterSelectHooks(exec); err != nil {
 				return o, err
 			}
 		}
@@ -343,13 +305,13 @@ func (q locationQuery) All(ctx context.Context, exec boil.ContextExecutor) (Loca
 }
 
 // Count returns the count of all Location records in the query.
-func (q locationQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q locationQuery) Count(exec boil.Executor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
 	queries.SetCount(q.Query)
 
-	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
+	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: failed to count locations rows")
 	}
@@ -358,14 +320,14 @@ func (q locationQuery) Count(ctx context.Context, exec boil.ContextExecutor) (in
 }
 
 // Exists checks if the row exists in the table.
-func (q locationQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q locationQuery) Exists(exec boil.Executor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
 	queries.SetCount(q.Query)
 	queries.SetLimit(q.Query, 1)
 
-	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
+	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
 		return false, errors.Wrap(err, "models: failed to check if locations exists")
 	}
@@ -410,7 +372,7 @@ func (o *Location) Collections(mods ...qm.QueryMod) collectionQuery {
 
 // LoadUser allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (locationL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeLocation interface{}, mods queries.Applicator) error {
+func (locationL) LoadUser(e boil.Executor, singular bool, maybeLocation interface{}, mods queries.Applicator) error {
 	var slice []*Location
 	var object *Location
 
@@ -425,9 +387,7 @@ func (locationL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular 
 		if object.R == nil {
 			object.R = &locationR{}
 		}
-		if !queries.IsNil(object.UserID) {
-			args = append(args, object.UserID)
-		}
+		args = append(args, object.UserID)
 
 	} else {
 	Outer:
@@ -437,14 +397,12 @@ func (locationL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular 
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.UserID) {
+				if a == obj.UserID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.UserID) {
-				args = append(args, obj.UserID)
-			}
+			args = append(args, obj.UserID)
 
 		}
 	}
@@ -461,7 +419,7 @@ func (locationL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular 
 		mods.Apply(query)
 	}
 
-	results, err := query.QueryContext(ctx, e)
+	results, err := query.Query(e)
 	if err != nil {
 		return errors.Wrap(err, "failed to eager load User")
 	}
@@ -480,7 +438,7 @@ func (locationL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular 
 
 	if len(locationAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+			if err := obj.doAfterSelectHooks(e); err != nil {
 				return err
 			}
 		}
@@ -502,7 +460,7 @@ func (locationL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular 
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.UserID, foreign.ID) {
+			if local.UserID == foreign.ID {
 				local.R.User = foreign
 				if foreign.R == nil {
 					foreign.R = &userR{}
@@ -518,7 +476,7 @@ func (locationL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular 
 
 // LoadCollections allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (locationL) LoadCollections(ctx context.Context, e boil.ContextExecutor, singular bool, maybeLocation interface{}, mods queries.Applicator) error {
+func (locationL) LoadCollections(e boil.Executor, singular bool, maybeLocation interface{}, mods queries.Applicator) error {
 	var slice []*Location
 	var object *Location
 
@@ -542,7 +500,7 @@ func (locationL) LoadCollections(ctx context.Context, e boil.ContextExecutor, si
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -563,7 +521,7 @@ func (locationL) LoadCollections(ctx context.Context, e boil.ContextExecutor, si
 		mods.Apply(query)
 	}
 
-	results, err := query.QueryContext(ctx, e)
+	results, err := query.Query(e)
 	if err != nil {
 		return errors.Wrap(err, "failed to eager load collection")
 	}
@@ -582,7 +540,7 @@ func (locationL) LoadCollections(ctx context.Context, e boil.ContextExecutor, si
 
 	if len(collectionAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+			if err := obj.doAfterSelectHooks(e); err != nil {
 				return err
 			}
 		}
@@ -600,7 +558,7 @@ func (locationL) LoadCollections(ctx context.Context, e boil.ContextExecutor, si
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.LocationID) {
+			if local.ID == foreign.LocationID {
 				local.R.Collections = append(local.R.Collections, foreign)
 				if foreign.R == nil {
 					foreign.R = &collectionR{}
@@ -617,10 +575,10 @@ func (locationL) LoadCollections(ctx context.Context, e boil.ContextExecutor, si
 // SetUser of the location to the related item.
 // Sets o.R.User to related.
 // Adds o to related.R.Locations.
-func (o *Location) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+func (o *Location) SetUser(exec boil.Executor, insert bool, related *User) error {
 	var err error
 	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+		if err = related.Insert(exec, boil.Infer()); err != nil {
 			return errors.Wrap(err, "failed to insert into foreign table")
 		}
 	}
@@ -632,16 +590,15 @@ func (o *Location) SetUser(ctx context.Context, exec boil.ContextExecutor, inser
 	)
 	values := []interface{}{related.ID, o.ID}
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, updateQuery)
+		fmt.Fprintln(boil.DebugWriter, values)
 	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+	if _, err = exec.Exec(updateQuery, values...); err != nil {
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.UserID, related.ID)
+	o.UserID = related.ID
 	if o.R == nil {
 		o.R = &locationR{
 			User: related,
@@ -661,49 +618,16 @@ func (o *Location) SetUser(ctx context.Context, exec boil.ContextExecutor, inser
 	return nil
 }
 
-// RemoveUser relationship.
-// Sets o.R.User to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Location) RemoveUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
-	var err error
-
-	queries.SetScanner(&o.UserID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.User = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Locations {
-		if queries.Equal(o.UserID, ri.UserID) {
-			continue
-		}
-
-		ln := len(related.R.Locations)
-		if ln > 1 && i < ln-1 {
-			related.R.Locations[i] = related.R.Locations[ln-1]
-		}
-		related.R.Locations = related.R.Locations[:ln-1]
-		break
-	}
-	return nil
-}
-
 // AddCollections adds the given related objects to the existing relationships
 // of the location, optionally inserting them as new records.
 // Appends related to o.R.Collections.
 // Sets related.R.Location appropriately.
-func (o *Location) AddCollections(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Collection) error {
+func (o *Location) AddCollections(exec boil.Executor, insert bool, related ...*Collection) error {
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.LocationID, o.ID)
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+			rel.LocationID = o.ID
+			if err = rel.Insert(exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
 		} else {
@@ -714,16 +638,15 @@ func (o *Location) AddCollections(ctx context.Context, exec boil.ContextExecutor
 			)
 			values := []interface{}{o.ID, rel.ID}
 
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
+			if boil.DebugMode {
+				fmt.Fprintln(boil.DebugWriter, updateQuery)
+				fmt.Fprintln(boil.DebugWriter, values)
 			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			if _, err = exec.Exec(updateQuery, values...); err != nil {
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.LocationID, o.ID)
+			rel.LocationID = o.ID
 		}
 	}
 
@@ -747,80 +670,6 @@ func (o *Location) AddCollections(ctx context.Context, exec boil.ContextExecutor
 	return nil
 }
 
-// SetCollections removes all previously related items of the
-// location replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.Location's Collections accordingly.
-// Replaces o.R.Collections with related.
-// Sets related.R.Location's Collections accordingly.
-func (o *Location) SetCollections(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Collection) error {
-	query := "update \"collection\" set \"location_id\" = null where \"location_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.Collections {
-			queries.SetScanner(&rel.LocationID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.Location = nil
-		}
-		o.R.Collections = nil
-	}
-
-	return o.AddCollections(ctx, exec, insert, related...)
-}
-
-// RemoveCollections relationships from objects passed in.
-// Removes related items from R.Collections (uses pointer comparison, removal does not keep order)
-// Sets related.R.Location.
-func (o *Location) RemoveCollections(ctx context.Context, exec boil.ContextExecutor, related ...*Collection) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.LocationID, nil)
-		if rel.R != nil {
-			rel.R.Location = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("location_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.Collections {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.Collections)
-			if ln > 1 && i < ln-1 {
-				o.R.Collections[i] = o.R.Collections[ln-1]
-			}
-			o.R.Collections = o.R.Collections[:ln-1]
-			break
-		}
-	}
-
-	return nil
-}
-
 // Locations retrieves all the records using an executor.
 func Locations(mods ...qm.QueryMod) locationQuery {
 	mods = append(mods, qm.From("\"locations\""))
@@ -829,7 +678,7 @@ func Locations(mods ...qm.QueryMod) locationQuery {
 
 // FindLocation retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindLocation(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Location, error) {
+func FindLocation(exec boil.Executor, iD int, selectCols ...string) (*Location, error) {
 	locationObj := &Location{}
 
 	sel := "*"
@@ -842,7 +691,7 @@ func FindLocation(ctx context.Context, exec boil.ContextExecutor, iD int, select
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, locationObj)
+	err := q.Bind(nil, exec, locationObj)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
@@ -850,7 +699,7 @@ func FindLocation(ctx context.Context, exec boil.ContextExecutor, iD int, select
 		return nil, errors.Wrap(err, "models: unable to select from locations")
 	}
 
-	if err = locationObj.doAfterSelectHooks(ctx, exec); err != nil {
+	if err = locationObj.doAfterSelectHooks(exec); err != nil {
 		return locationObj, err
 	}
 
@@ -859,14 +708,14 @@ func FindLocation(ctx context.Context, exec boil.ContextExecutor, iD int, select
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *Location) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *Location) Insert(exec boil.Executor, columns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no locations provided for insertion")
 	}
 
 	var err error
 
-	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
+	if err := o.doBeforeInsertHooks(exec); err != nil {
 		return err
 	}
 
@@ -911,16 +760,15 @@ func (o *Location) Insert(ctx context.Context, exec boil.ContextExecutor, column
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, vals)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, vals)
 	}
 
 	if len(cache.retMapping) != 0 {
-		err = exec.QueryRowContext(ctx, cache.query, vals...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
+		err = exec.QueryRow(cache.query, vals...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	} else {
-		_, err = exec.ExecContext(ctx, cache.query, vals...)
+		_, err = exec.Exec(cache.query, vals...)
 	}
 
 	if err != nil {
@@ -933,15 +781,15 @@ func (o *Location) Insert(ctx context.Context, exec boil.ContextExecutor, column
 		locationInsertCacheMut.Unlock()
 	}
 
-	return o.doAfterInsertHooks(ctx, exec)
+	return o.doAfterInsertHooks(exec)
 }
 
 // Update uses an executor to update the Location.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *Location) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *Location) Update(exec boil.Executor, columns boil.Columns) (int64, error) {
 	var err error
-	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
+	if err = o.doBeforeUpdateHooks(exec); err != nil {
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
@@ -974,13 +822,12 @@ func (o *Location) Update(ctx context.Context, exec boil.ContextExecutor, column
 
 	values := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), cache.valueMapping)
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, values)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, values)
 	}
 	var result sql.Result
-	result, err = exec.ExecContext(ctx, cache.query, values...)
+	result, err = exec.Exec(cache.query, values...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update locations row")
 	}
@@ -996,14 +843,14 @@ func (o *Location) Update(ctx context.Context, exec boil.ContextExecutor, column
 		locationUpdateCacheMut.Unlock()
 	}
 
-	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
+	return rowsAff, o.doAfterUpdateHooks(exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q locationQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q locationQuery) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
-	result, err := q.Query.ExecContext(ctx, exec)
+	result, err := q.Query.Exec(exec)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update all for locations")
 	}
@@ -1017,7 +864,7 @@ func (q locationQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor,
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o LocationSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o LocationSlice) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -1047,12 +894,11 @@ func (o LocationSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor,
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, locationPrimaryKeyColumns, len(o)))
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args...)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args...)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update all in location slice")
 	}
@@ -1066,12 +912,12 @@ func (o LocationSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor,
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *Location) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+func (o *Location) Upsert(exec boil.Executor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no locations provided for upsert")
 	}
 
-	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
+	if err := o.doBeforeUpsertHooks(exec); err != nil {
 		return err
 	}
 
@@ -1154,18 +1000,17 @@ func (o *Location) Upsert(ctx context.Context, exec boil.ContextExecutor, update
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, vals)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, vals)
 	}
 	if len(cache.retMapping) != 0 {
-		err = exec.QueryRowContext(ctx, cache.query, vals...).Scan(returns...)
+		err = exec.QueryRow(cache.query, vals...).Scan(returns...)
 		if errors.Is(err, sql.ErrNoRows) {
 			err = nil // Postgres doesn't return anything when there's no update
 		}
 	} else {
-		_, err = exec.ExecContext(ctx, cache.query, vals...)
+		_, err = exec.Exec(cache.query, vals...)
 	}
 	if err != nil {
 		return errors.Wrap(err, "models: unable to upsert locations")
@@ -1177,29 +1022,28 @@ func (o *Location) Upsert(ctx context.Context, exec boil.ContextExecutor, update
 		locationUpsertCacheMut.Unlock()
 	}
 
-	return o.doAfterUpsertHooks(ctx, exec)
+	return o.doAfterUpsertHooks(exec)
 }
 
 // Delete deletes a single Location record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Location) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Location) Delete(exec boil.Executor) (int64, error) {
 	if o == nil {
 		return 0, errors.New("models: no Location provided for delete")
 	}
 
-	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
+	if err := o.doBeforeDeleteHooks(exec); err != nil {
 		return 0, err
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), locationPrimaryKeyMapping)
 	sql := "DELETE FROM \"locations\" WHERE \"id\"=$1"
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args...)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args...)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete from locations")
 	}
@@ -1209,7 +1053,7 @@ func (o *Location) Delete(ctx context.Context, exec boil.ContextExecutor) (int64
 		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for locations")
 	}
 
-	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
+	if err := o.doAfterDeleteHooks(exec); err != nil {
 		return 0, err
 	}
 
@@ -1217,14 +1061,14 @@ func (o *Location) Delete(ctx context.Context, exec boil.ContextExecutor) (int64
 }
 
 // DeleteAll deletes all matching rows.
-func (q locationQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q locationQuery) DeleteAll(exec boil.Executor) (int64, error) {
 	if q.Query == nil {
 		return 0, errors.New("models: no locationQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
-	result, err := q.Query.ExecContext(ctx, exec)
+	result, err := q.Query.Exec(exec)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete all from locations")
 	}
@@ -1238,14 +1082,14 @@ func (q locationQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor)
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o LocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o LocationSlice) DeleteAll(exec boil.Executor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
 	if len(locationBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
+			if err := obj.doBeforeDeleteHooks(exec); err != nil {
 				return 0, err
 			}
 		}
@@ -1260,12 +1104,11 @@ func (o LocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor)
 	sql := "DELETE FROM \"locations\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, locationPrimaryKeyColumns, len(o))
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete all from location slice")
 	}
@@ -1277,7 +1120,7 @@ func (o LocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor)
 
 	if len(locationAfterDeleteHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
+			if err := obj.doAfterDeleteHooks(exec); err != nil {
 				return 0, err
 			}
 		}
@@ -1288,8 +1131,8 @@ func (o LocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor)
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *Location) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindLocation(ctx, exec, o.ID)
+func (o *Location) Reload(exec boil.Executor) error {
+	ret, err := FindLocation(exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1300,7 +1143,7 @@ func (o *Location) Reload(ctx context.Context, exec boil.ContextExecutor) error 
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *LocationSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *LocationSlice) ReloadAll(exec boil.Executor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
@@ -1317,7 +1160,7 @@ func (o *LocationSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor
 
 	q := queries.Raw(sql, args...)
 
-	err := q.Bind(ctx, exec, &slice)
+	err := q.Bind(nil, exec, &slice)
 	if err != nil {
 		return errors.Wrap(err, "models: unable to reload all in LocationSlice")
 	}
@@ -1328,16 +1171,15 @@ func (o *LocationSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor
 }
 
 // LocationExists checks if the Location row exists.
-func LocationExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+func LocationExists(exec boil.Executor, iD int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"locations\" where \"id\"=$1 limit 1)"
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, iD)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, iD)
 	}
-	row := exec.QueryRowContext(ctx, sql, iD)
+	row := exec.QueryRow(sql, iD)
 
 	err := row.Scan(&exists)
 	if err != nil {

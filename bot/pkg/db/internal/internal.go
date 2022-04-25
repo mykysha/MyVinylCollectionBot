@@ -1,21 +1,18 @@
 package internal
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/nndergunov/tgBot/bot/pkg/db/internal/models"
 	"github.com/nndergunov/tgBot/bot/pkg/domain/entities"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type DB struct {
-	db  *sql.DB
-	ctx context.Context //nolint:containedctx
+	db *sql.DB
 }
 
 func NewDB(dbURL string) (*DB, error) {
@@ -24,16 +21,13 @@ func NewDB(dbURL string) (*DB, error) {
 		return nil, fmt.Errorf("NewDB: %w", err)
 	}
 
-	ctx := context.TODO()
-
 	return &DB{
-		db:  database,
-		ctx: ctx,
+		db: database,
 	}, nil
 }
 
 func (d DB) DeleteAllInfos() error {
-	_, err := models.Infos().DeleteAll(d.ctx, d.db)
+	_, err := models.Infos().DeleteAll(d.db)
 	if err != nil {
 		return fmt.Errorf("DeleteAllInfos: %w", err)
 	}
@@ -44,9 +38,9 @@ func (d DB) DeleteAllInfos() error {
 func (d DB) InsertInfo(startTime time.Time, timeLayout string) error {
 	var info models.Info
 
-	info.Starttime = null.StringFrom(startTime.Format(timeLayout))
+	info.Starttime = startTime.Format(timeLayout)
 
-	err := info.Insert(d.ctx, d.db, boil.Infer())
+	err := info.Insert(d.db, boil.Infer())
 	if err != nil {
 		return fmt.Errorf("InsertInfo: %w", err)
 	}
@@ -55,7 +49,7 @@ func (d DB) InsertInfo(startTime time.Time, timeLayout string) error {
 }
 
 func (d DB) GetInfo() (*models.Info, error) {
-	infos, err := models.Infos().All(d.ctx, d.db)
+	infos, err := models.Infos().All(d.db)
 	if err != nil {
 		return nil, fmt.Errorf("GetInfo: %w", err)
 	}
@@ -65,14 +59,14 @@ func (d DB) GetInfo() (*models.Info, error) {
 	return infos[lastInfo], nil
 }
 
-func (d DB) AddUserIfNotExists(userID int, userName string) error {
+func (d DB) AddUserIfNotExists(userID string, userName string) error {
 	allUsers, err := d.GetUsers()
 	if err != nil {
 		return fmt.Errorf("AddUserIfNotExists: %w", err)
 	}
 
 	for _, user := range allUsers {
-		if user.Telegramid.Int == userID {
+		if user.Telegramid == userID {
 			return nil
 		}
 	}
@@ -86,7 +80,7 @@ func (d DB) AddUserIfNotExists(userID int, userName string) error {
 }
 
 func (d DB) GetUsers() (models.UserSlice, error) {
-	users, err := models.Users().All(d.ctx, d.db)
+	users, err := models.Users().All(d.db)
 	if err != nil {
 		return nil, fmt.Errorf("GetUsers: %w", err)
 	}
@@ -94,13 +88,13 @@ func (d DB) GetUsers() (models.UserSlice, error) {
 	return users, nil
 }
 
-func (d DB) InsertUser(userID int, userName string) error {
+func (d DB) InsertUser(userID, userName string) error {
 	var user models.User
 
-	user.Telegramid = null.IntFrom(userID)
-	user.Username = null.StringFrom(userName)
+	user.Telegramid = userID
+	user.Username = userName
 
-	err := user.Insert(d.ctx, d.db, boil.Infer())
+	err := user.Insert(d.db, boil.Infer())
 	if err != nil {
 		return fmt.Errorf("InsertUser: %w", err)
 	}
@@ -108,8 +102,8 @@ func (d DB) InsertUser(userID int, userName string) error {
 	return nil
 }
 
-func (d DB) GetUserInTable(userID int) (int, error) {
-	user, err := models.Users(qm.Where("telegramid=?", userID)).One(d.ctx, d.db)
+func (d DB) GetUserInTable(userID string) (int, error) {
+	user, err := models.Users(qm.Where("telegramid=?", userID)).One(d.db)
 	if err != nil {
 		return 0, fmt.Errorf("GetUserInTable: %w", err)
 	}
@@ -117,14 +111,14 @@ func (d DB) GetUserInTable(userID int) (int, error) {
 	return user.ID, nil
 }
 
-func (d DB) AddLocationIfNotExists(locationName string, userID int) error {
+func (d DB) AddLocationIfNotExists(locationName, userID string) error {
 	allUserLocations, err := d.GetUserLocations(userID)
 	if err != nil {
 		return fmt.Errorf("AddLocationIfNotExists: %w", err)
 	}
 
 	for _, location := range allUserLocations {
-		if location.Name.String == locationName {
+		if location.Name == locationName {
 			return nil
 		}
 	}
@@ -137,13 +131,13 @@ func (d DB) AddLocationIfNotExists(locationName string, userID int) error {
 	return nil
 }
 
-func (d DB) GetUserLocations(userID int) (models.LocationSlice, error) {
+func (d DB) GetUserLocations(userID string) (models.LocationSlice, error) {
 	userInTable, err := d.GetUserInTable(userID)
 	if err != nil {
 		return nil, fmt.Errorf("GetUserLocations: %w", err)
 	}
 
-	locations, err := models.Locations(qm.Where("user_id=?", userInTable)).All(d.ctx, d.db)
+	locations, err := models.Locations(qm.Where("user_id=?", userInTable)).All(d.db)
 	if err != nil {
 		return nil, fmt.Errorf("GetUserLocations: %w", err)
 	}
@@ -151,13 +145,13 @@ func (d DB) GetUserLocations(userID int) (models.LocationSlice, error) {
 	return locations, nil
 }
 
-func (d DB) GetLocationByName(locationName string, userID int) (*models.Location, error) {
+func (d DB) GetLocationByName(locationName, userID string) (*models.Location, error) {
 	userInTable, err := d.GetUserInTable(userID)
 	if err != nil {
 		return nil, fmt.Errorf("GetUserLocations: %w", err)
 	}
 
-	locations, err := models.Locations(qm.Where("user_id=? and name=?", userInTable, locationName)).One(d.ctx, d.db)
+	locations, err := models.Locations(qm.Where("user_id=? and name=?", userInTable, locationName)).One(d.db)
 	if err != nil {
 		return nil, fmt.Errorf("GetUserLocations: %w", err)
 	}
@@ -165,7 +159,7 @@ func (d DB) GetLocationByName(locationName string, userID int) (*models.Location
 	return locations, nil
 }
 
-func (d DB) InsertLocation(locationName string, userID int) error {
+func (d DB) InsertLocation(locationName, userID string) error {
 	userInTable, err := d.GetUserInTable(userID)
 	if err != nil {
 		return fmt.Errorf("InsertLocation: %w", err)
@@ -173,10 +167,10 @@ func (d DB) InsertLocation(locationName string, userID int) error {
 
 	var location models.Location
 
-	location.Name = null.StringFrom(locationName)
-	location.UserID = null.IntFrom(userInTable)
+	location.Name = locationName
+	location.UserID = userInTable
 
-	err = location.Insert(d.ctx, d.db, boil.Infer())
+	err = location.Insert(d.db, boil.Infer())
 	if err != nil {
 		return fmt.Errorf("InsertLocation: %w", err)
 	}
@@ -184,16 +178,13 @@ func (d DB) InsertLocation(locationName string, userID int) error {
 	return nil
 }
 
-func (d DB) GetLocationInTable(locationName string, userID int) (int, error) {
+func (d DB) GetLocationInTable(locationName, userID string) (int, error) {
 	userInTable, err := d.GetUserInTable(userID)
 	if err != nil {
 		return 0, fmt.Errorf("GetLocationInTable: %w", err)
 	}
 
-	location, err := models.Locations(qm.Where("user_id=? and name=?", userInTable, locationName)).One(
-		d.ctx,
-		d.db,
-	)
+	location, err := models.Locations(qm.Where("user_id=? and name=?", userInTable, locationName)).One(d.db)
 	if err != nil {
 		return 0, fmt.Errorf("GetLocationInTable: %w", err)
 	}
@@ -201,7 +192,7 @@ func (d DB) GetLocationInTable(locationName string, userID int) (int, error) {
 	return location.ID, nil
 }
 
-func (d DB) AddAlbumToCollection(album entities.Album, locationName string, userID int) error {
+func (d DB) AddAlbumToCollection(album entities.Album, locationName, userID string) error {
 	locationInTable, err := d.GetLocationInTable(locationName, userID)
 	if err != nil {
 		return fmt.Errorf("AddAlbumToCollection: %w", err)
@@ -237,7 +228,7 @@ func (d DB) AddArtistIfNotExists(artistName string) error {
 	}
 
 	for _, artist := range allArtists {
-		if artist.Name.String == artistName {
+		if artist.Name == artistName {
 			return nil
 		}
 	}
@@ -251,7 +242,7 @@ func (d DB) AddArtistIfNotExists(artistName string) error {
 }
 
 func (d DB) GetArtists() (models.ArtistSlice, error) {
-	artists, err := models.Artists().All(d.ctx, d.db)
+	artists, err := models.Artists().All(d.db)
 	if err != nil {
 		return nil, fmt.Errorf("GetArtists: %w", err)
 	}
@@ -262,9 +253,9 @@ func (d DB) GetArtists() (models.ArtistSlice, error) {
 func (d DB) InsertArtist(artistName string) error {
 	var artist models.Artist
 
-	artist.Name = null.StringFrom(artistName)
+	artist.Name = artistName
 
-	err := artist.Insert(d.ctx, d.db, boil.Infer())
+	err := artist.Insert(d.db, boil.Infer())
 	if err != nil {
 		return fmt.Errorf("InsertUser: %w", err)
 	}
@@ -273,7 +264,7 @@ func (d DB) InsertArtist(artistName string) error {
 }
 
 func (d DB) GetArtistInTable(artistName string) (int, error) {
-	artist, err := models.Artists(qm.Where("name=?", artistName)).One(d.ctx, d.db)
+	artist, err := models.Artists(qm.Where("name=?", artistName)).One(d.db)
 	if err != nil {
 		return 0, fmt.Errorf("GetUserInTable: %w", err)
 	}
@@ -281,8 +272,8 @@ func (d DB) GetArtistInTable(artistName string) (int, error) {
 	return artist.ID, nil
 }
 
-func (d DB) GetArtistByID(artistID null.Int) (*models.Artist, error) {
-	artist, err := models.Artists(qm.Where("id=?", artistID)).One(d.ctx, d.db)
+func (d DB) GetArtistByID(artistID int) (*models.Artist, error) {
+	artist, err := models.Artists(qm.Where("id=?", artistID)).One(d.db)
 	if err != nil {
 		return nil, fmt.Errorf("GetUserInTable: %w", err)
 	}
@@ -298,16 +289,16 @@ func (d DB) InsertAlbum(albumData entities.Album) error {
 		return fmt.Errorf("InsertAlbum: %w", err)
 	}
 
-	album.ArtistID = null.IntFrom(artistInTable)
-	album.AlbumName = null.StringFrom(albumData.Name)
-	album.Genre = null.StringFrom(albumData.Genre)
-	album.ReleaseYear = null.IntFrom(albumData.ReleaseYear)
-	album.ReissueYear = null.IntFrom(albumData.ReissueYear)
-	album.Label = null.StringFrom(albumData.Label)
-	album.Coloured = null.BoolFrom(albumData.Coloured)
-	album.CoverID = null.StringFrom(albumData.CoverID)
+	album.ArtistID = artistInTable
+	album.AlbumName = albumData.Name
+	album.Genre = albumData.Genre
+	album.ReleaseYear = albumData.ReleaseYear
+	album.ReissueYear = albumData.ReissueYear
+	album.Label = albumData.Label
+	album.Coloured = albumData.Coloured
+	album.CoverID = albumData.CoverID
 
-	err = album.Insert(d.ctx, d.db, boil.Infer())
+	err = album.Insert(d.db, boil.Infer())
 	if err != nil {
 		return fmt.Errorf("InsertAlbum: %w", err)
 	}
@@ -323,7 +314,7 @@ func (d DB) GetAlbumInTable(albumData entities.Album) (int, error) {
 		albumData.ReleaseYear,
 		albumData.ReissueYear,
 		albumData.Label,
-	)).One(d.ctx, d.db)
+	)).One(d.db)
 	if err != nil {
 		return 0, fmt.Errorf("GetUserInTable: %w", err)
 	}
@@ -334,10 +325,10 @@ func (d DB) GetAlbumInTable(albumData entities.Album) (int, error) {
 func (d DB) InsertToCollection(albumInTable, locationInTable int) error {
 	var collectionElement models.Collection
 
-	collectionElement.AlbumID = null.IntFrom(albumInTable)
-	collectionElement.LocationID = null.IntFrom(locationInTable)
+	collectionElement.AlbumID = albumInTable
+	collectionElement.LocationID = locationInTable
 
-	err := collectionElement.Insert(d.ctx, d.db, boil.Infer())
+	err := collectionElement.Insert(d.db, boil.Infer())
 	if err != nil {
 		return fmt.Errorf("InsertToCollection: %w", err)
 	}
@@ -348,13 +339,13 @@ func (d DB) InsertToCollection(albumInTable, locationInTable int) error {
 func (d DB) GetAlbumsByLocation(locationInTable int) (models.AlbumSlice, error) {
 	var albums models.AlbumSlice
 
-	albumIDList, err := models.Collections(qm.Where("location_id=?", locationInTable)).All(d.ctx, d.db)
+	albumIDList, err := models.Collections(qm.Where("location_id=?", locationInTable)).All(d.db)
 	if err != nil {
 		return nil, fmt.Errorf("GetAlbumsByLocation: %w", err)
 	}
 
 	for _, el := range albumIDList {
-		album, err := models.Albums(qm.Where("id=?", el.AlbumID)).One(d.ctx, d.db)
+		album, err := models.Albums(qm.Where("id=?", el.AlbumID)).One(d.db)
 		if err != nil {
 			return nil, fmt.Errorf("GetAlbumsByLocation: %w", err)
 		}
@@ -365,7 +356,7 @@ func (d DB) GetAlbumsByLocation(locationInTable int) (models.AlbumSlice, error) 
 	return albums, nil
 }
 
-func (d DB) GetCollection(userID int) (models.AlbumSlice, error) {
+func (d DB) GetCollection(userID string) (models.AlbumSlice, error) {
 	var albums models.AlbumSlice
 
 	locations, err := d.GetUserLocations(userID)
@@ -385,7 +376,7 @@ func (d DB) GetCollection(userID int) (models.AlbumSlice, error) {
 	return albums, nil
 }
 
-func (d DB) DeleteAlbum(userID int, albumID int) error {
+func (d DB) DeleteAlbum(userID string, albumID int) error {
 	var albumIDList models.CollectionSlice
 
 	locations, err := d.GetUserLocations(userID)
@@ -394,15 +385,15 @@ func (d DB) DeleteAlbum(userID int, albumID int) error {
 	}
 
 	for _, location := range locations {
-		albumInLocList, err := models.Collections(qm.Where("location_id=?", location.ID)).All(d.ctx, d.db)
+		albumInLocList, err := models.Collections(qm.Where("location_id=?", location.ID)).All(d.db)
 		if err != nil {
 			return fmt.Errorf("DeleteAlbum: %w", err)
 		}
 
 		albumIDList = append(albumIDList, albumInLocList...)
 	}
-	
-	_, err = albumIDList[albumID].Delete(d.ctx, d.db)
+
+	_, err = albumIDList[albumID].Delete(d.db)
 	if err != nil {
 		return fmt.Errorf("DeleteAlbum: %w", err)
 	}

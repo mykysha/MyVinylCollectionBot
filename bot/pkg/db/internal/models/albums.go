@@ -4,7 +4,6 @@
 package models
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"reflect"
@@ -14,7 +13,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,15 +22,15 @@ import (
 
 // Album is an object representing the database table.
 type Album struct {
-	ID          int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	ArtistID    null.Int    `boil:"artist_id" json:"artist_id,omitempty" toml:"artist_id" yaml:"artist_id,omitempty"`
-	AlbumName   null.String `boil:"album_name" json:"album_name,omitempty" toml:"album_name" yaml:"album_name,omitempty"`
-	Genre       null.String `boil:"genre" json:"genre,omitempty" toml:"genre" yaml:"genre,omitempty"`
-	ReleaseYear null.Int    `boil:"release_year" json:"release_year,omitempty" toml:"release_year" yaml:"release_year,omitempty"`
-	ReissueYear null.Int    `boil:"reissue_year" json:"reissue_year,omitempty" toml:"reissue_year" yaml:"reissue_year,omitempty"`
-	Label       null.String `boil:"label" json:"label,omitempty" toml:"label" yaml:"label,omitempty"`
-	Coloured    null.Bool   `boil:"coloured" json:"coloured,omitempty" toml:"coloured" yaml:"coloured,omitempty"`
-	CoverID     null.String `boil:"cover_id" json:"cover_id,omitempty" toml:"cover_id" yaml:"cover_id,omitempty"`
+	ID          int    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ArtistID    int    `boil:"artist_id" json:"artist_id" toml:"artist_id" yaml:"artist_id"`
+	AlbumName   string `boil:"album_name" json:"album_name" toml:"album_name" yaml:"album_name"`
+	Genre       string `boil:"genre" json:"genre" toml:"genre" yaml:"genre"`
+	ReleaseYear int    `boil:"release_year" json:"release_year" toml:"release_year" yaml:"release_year"`
+	ReissueYear int    `boil:"reissue_year" json:"reissue_year" toml:"reissue_year" yaml:"reissue_year"`
+	Label       string `boil:"label" json:"label" toml:"label" yaml:"label"`
+	Coloured    bool   `boil:"coloured" json:"coloured" toml:"coloured" yaml:"coloured"`
+	CoverID     string `boil:"cover_id" json:"cover_id" toml:"cover_id" yaml:"cover_id"`
 
 	R *albumR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L albumL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -107,116 +105,73 @@ func (w whereHelperint) NIN(slice []int) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelpernull_Int struct{ field string }
+type whereHelperstring struct{ field string }
 
-func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
+func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperstring) IN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
-func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
+func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+type whereHelperbool struct{ field string }
 
-type whereHelpernull_Bool struct{ field string }
-
-func (w whereHelpernull_Bool) EQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Bool) NEQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Bool) LT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Bool) LTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Bool) GT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Bool) GTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_Bool) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Bool) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var AlbumWhere = struct {
 	ID          whereHelperint
-	ArtistID    whereHelpernull_Int
-	AlbumName   whereHelpernull_String
-	Genre       whereHelpernull_String
-	ReleaseYear whereHelpernull_Int
-	ReissueYear whereHelpernull_Int
-	Label       whereHelpernull_String
-	Coloured    whereHelpernull_Bool
-	CoverID     whereHelpernull_String
+	ArtistID    whereHelperint
+	AlbumName   whereHelperstring
+	Genre       whereHelperstring
+	ReleaseYear whereHelperint
+	ReissueYear whereHelperint
+	Label       whereHelperstring
+	Coloured    whereHelperbool
+	CoverID     whereHelperstring
 }{
 	ID:          whereHelperint{field: "\"albums\".\"id\""},
-	ArtistID:    whereHelpernull_Int{field: "\"albums\".\"artist_id\""},
-	AlbumName:   whereHelpernull_String{field: "\"albums\".\"album_name\""},
-	Genre:       whereHelpernull_String{field: "\"albums\".\"genre\""},
-	ReleaseYear: whereHelpernull_Int{field: "\"albums\".\"release_year\""},
-	ReissueYear: whereHelpernull_Int{field: "\"albums\".\"reissue_year\""},
-	Label:       whereHelpernull_String{field: "\"albums\".\"label\""},
-	Coloured:    whereHelpernull_Bool{field: "\"albums\".\"coloured\""},
-	CoverID:     whereHelpernull_String{field: "\"albums\".\"cover_id\""},
+	ArtistID:    whereHelperint{field: "\"albums\".\"artist_id\""},
+	AlbumName:   whereHelperstring{field: "\"albums\".\"album_name\""},
+	Genre:       whereHelperstring{field: "\"albums\".\"genre\""},
+	ReleaseYear: whereHelperint{field: "\"albums\".\"release_year\""},
+	ReissueYear: whereHelperint{field: "\"albums\".\"reissue_year\""},
+	Label:       whereHelperstring{field: "\"albums\".\"label\""},
+	Coloured:    whereHelperbool{field: "\"albums\".\"coloured\""},
+	CoverID:     whereHelperstring{field: "\"albums\".\"cover_id\""},
 }
 
 // AlbumRels is where relationship names are stored.
 var AlbumRels = struct {
 	Artist      string
 	Collections string
-	Wishlists   string
 }{
 	Artist:      "Artist",
 	Collections: "Collections",
-	Wishlists:   "Wishlists",
 }
 
 // albumR is where relationships are stored.
 type albumR struct {
 	Artist      *Artist         `boil:"Artist" json:"Artist" toml:"Artist" yaml:"Artist"`
 	Collections CollectionSlice `boil:"Collections" json:"Collections" toml:"Collections" yaml:"Collections"`
-	Wishlists   WishlistSlice   `boil:"Wishlists" json:"Wishlists" toml:"Wishlists" yaml:"Wishlists"`
 }
 
 // NewStruct creates a new relationship struct
@@ -229,8 +184,8 @@ type albumL struct{}
 
 var (
 	albumAllColumns            = []string{"id", "artist_id", "album_name", "genre", "release_year", "reissue_year", "label", "coloured", "cover_id"}
-	albumColumnsWithoutDefault = []string{}
-	albumColumnsWithDefault    = []string{"id", "artist_id", "album_name", "genre", "release_year", "reissue_year", "label", "coloured", "cover_id"}
+	albumColumnsWithoutDefault = []string{"artist_id", "album_name", "genre", "release_year", "reissue_year", "label", "coloured", "cover_id"}
+	albumColumnsWithDefault    = []string{"id"}
 	albumPrimaryKeyColumns     = []string{"id"}
 	albumGeneratedColumns      = []string{}
 )
@@ -240,7 +195,7 @@ type (
 	// This should almost always be used instead of []Album.
 	AlbumSlice []*Album
 	// AlbumHook is the signature for custom Album hook methods
-	AlbumHook func(context.Context, boil.ContextExecutor, *Album) error
+	AlbumHook func(boil.Executor, *Album) error
 
 	albumQuery struct {
 		*queries.Query
@@ -283,13 +238,9 @@ var albumBeforeUpsertHooks []AlbumHook
 var albumAfterUpsertHooks []AlbumHook
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *Album) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Album) doAfterSelectHooks(exec boil.Executor) (err error) {
 	for _, hook := range albumAfterSelectHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -298,13 +249,9 @@ func (o *Album) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *Album) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Album) doBeforeInsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range albumBeforeInsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -313,13 +260,9 @@ func (o *Album) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *Album) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Album) doAfterInsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range albumAfterInsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -328,13 +271,9 @@ func (o *Album) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *Album) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Album) doBeforeUpdateHooks(exec boil.Executor) (err error) {
 	for _, hook := range albumBeforeUpdateHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -343,13 +282,9 @@ func (o *Album) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *Album) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Album) doAfterUpdateHooks(exec boil.Executor) (err error) {
 	for _, hook := range albumAfterUpdateHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -358,13 +293,9 @@ func (o *Album) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *Album) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Album) doBeforeDeleteHooks(exec boil.Executor) (err error) {
 	for _, hook := range albumBeforeDeleteHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -373,13 +304,9 @@ func (o *Album) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *Album) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Album) doAfterDeleteHooks(exec boil.Executor) (err error) {
 	for _, hook := range albumAfterDeleteHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -388,13 +315,9 @@ func (o *Album) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *Album) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Album) doBeforeUpsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range albumBeforeUpsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -403,13 +326,9 @@ func (o *Album) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *Album) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Album) doAfterUpsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range albumAfterUpsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -442,12 +361,12 @@ func AddAlbumHook(hookPoint boil.HookPoint, albumHook AlbumHook) {
 }
 
 // One returns a single album record from the query.
-func (q albumQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Album, error) {
+func (q albumQuery) One(exec boil.Executor) (*Album, error) {
 	o := &Album{}
 
 	queries.SetLimit(q.Query, 1)
 
-	err := q.Bind(ctx, exec, o)
+	err := q.Bind(nil, exec, o)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
@@ -455,7 +374,7 @@ func (q albumQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Album,
 		return nil, errors.Wrap(err, "models: failed to execute a one query for albums")
 	}
 
-	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
+	if err := o.doAfterSelectHooks(exec); err != nil {
 		return o, err
 	}
 
@@ -463,17 +382,17 @@ func (q albumQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Album,
 }
 
 // All returns all Album records from the query.
-func (q albumQuery) All(ctx context.Context, exec boil.ContextExecutor) (AlbumSlice, error) {
+func (q albumQuery) All(exec boil.Executor) (AlbumSlice, error) {
 	var o []*Album
 
-	err := q.Bind(ctx, exec, &o)
+	err := q.Bind(nil, exec, &o)
 	if err != nil {
 		return nil, errors.Wrap(err, "models: failed to assign all query results to Album slice")
 	}
 
 	if len(albumAfterSelectHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
+			if err := obj.doAfterSelectHooks(exec); err != nil {
 				return o, err
 			}
 		}
@@ -483,13 +402,13 @@ func (q albumQuery) All(ctx context.Context, exec boil.ContextExecutor) (AlbumSl
 }
 
 // Count returns the count of all Album records in the query.
-func (q albumQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q albumQuery) Count(exec boil.Executor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
 	queries.SetCount(q.Query)
 
-	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
+	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: failed to count albums rows")
 	}
@@ -498,14 +417,14 @@ func (q albumQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64
 }
 
 // Exists checks if the row exists in the table.
-func (q albumQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q albumQuery) Exists(exec boil.Executor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
 	queries.SetCount(q.Query)
 	queries.SetLimit(q.Query, 1)
 
-	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
+	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
 		return false, errors.Wrap(err, "models: failed to check if albums exists")
 	}
@@ -548,30 +467,9 @@ func (o *Album) Collections(mods ...qm.QueryMod) collectionQuery {
 	return query
 }
 
-// Wishlists retrieves all the wishlist's Wishlists with an executor.
-func (o *Album) Wishlists(mods ...qm.QueryMod) wishlistQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"wishlist\".\"album_id\"=?", o.ID),
-	)
-
-	query := Wishlists(queryMods...)
-	queries.SetFrom(query.Query, "\"wishlist\"")
-
-	if len(queries.GetSelect(query.Query)) == 0 {
-		queries.SetSelect(query.Query, []string{"\"wishlist\".*"})
-	}
-
-	return query
-}
-
 // LoadArtist allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (albumL) LoadArtist(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAlbum interface{}, mods queries.Applicator) error {
+func (albumL) LoadArtist(e boil.Executor, singular bool, maybeAlbum interface{}, mods queries.Applicator) error {
 	var slice []*Album
 	var object *Album
 
@@ -586,9 +484,7 @@ func (albumL) LoadArtist(ctx context.Context, e boil.ContextExecutor, singular b
 		if object.R == nil {
 			object.R = &albumR{}
 		}
-		if !queries.IsNil(object.ArtistID) {
-			args = append(args, object.ArtistID)
-		}
+		args = append(args, object.ArtistID)
 
 	} else {
 	Outer:
@@ -598,14 +494,12 @@ func (albumL) LoadArtist(ctx context.Context, e boil.ContextExecutor, singular b
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ArtistID) {
+				if a == obj.ArtistID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.ArtistID) {
-				args = append(args, obj.ArtistID)
-			}
+			args = append(args, obj.ArtistID)
 
 		}
 	}
@@ -622,7 +516,7 @@ func (albumL) LoadArtist(ctx context.Context, e boil.ContextExecutor, singular b
 		mods.Apply(query)
 	}
 
-	results, err := query.QueryContext(ctx, e)
+	results, err := query.Query(e)
 	if err != nil {
 		return errors.Wrap(err, "failed to eager load Artist")
 	}
@@ -641,7 +535,7 @@ func (albumL) LoadArtist(ctx context.Context, e boil.ContextExecutor, singular b
 
 	if len(albumAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+			if err := obj.doAfterSelectHooks(e); err != nil {
 				return err
 			}
 		}
@@ -663,7 +557,7 @@ func (albumL) LoadArtist(ctx context.Context, e boil.ContextExecutor, singular b
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.ArtistID, foreign.ID) {
+			if local.ArtistID == foreign.ID {
 				local.R.Artist = foreign
 				if foreign.R == nil {
 					foreign.R = &artistR{}
@@ -679,7 +573,7 @@ func (albumL) LoadArtist(ctx context.Context, e boil.ContextExecutor, singular b
 
 // LoadCollections allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (albumL) LoadCollections(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAlbum interface{}, mods queries.Applicator) error {
+func (albumL) LoadCollections(e boil.Executor, singular bool, maybeAlbum interface{}, mods queries.Applicator) error {
 	var slice []*Album
 	var object *Album
 
@@ -703,7 +597,7 @@ func (albumL) LoadCollections(ctx context.Context, e boil.ContextExecutor, singu
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -724,7 +618,7 @@ func (albumL) LoadCollections(ctx context.Context, e boil.ContextExecutor, singu
 		mods.Apply(query)
 	}
 
-	results, err := query.QueryContext(ctx, e)
+	results, err := query.Query(e)
 	if err != nil {
 		return errors.Wrap(err, "failed to eager load collection")
 	}
@@ -743,7 +637,7 @@ func (albumL) LoadCollections(ctx context.Context, e boil.ContextExecutor, singu
 
 	if len(collectionAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+			if err := obj.doAfterSelectHooks(e); err != nil {
 				return err
 			}
 		}
@@ -761,7 +655,7 @@ func (albumL) LoadCollections(ctx context.Context, e boil.ContextExecutor, singu
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.AlbumID) {
+			if local.ID == foreign.AlbumID {
 				local.R.Collections = append(local.R.Collections, foreign)
 				if foreign.R == nil {
 					foreign.R = &collectionR{}
@@ -775,111 +669,13 @@ func (albumL) LoadCollections(ctx context.Context, e boil.ContextExecutor, singu
 	return nil
 }
 
-// LoadWishlists allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (albumL) LoadWishlists(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAlbum interface{}, mods queries.Applicator) error {
-	var slice []*Album
-	var object *Album
-
-	if singular {
-		object = maybeAlbum.(*Album)
-	} else {
-		slice = *maybeAlbum.(*[]*Album)
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &albumR{}
-		}
-		args = append(args, object.ID)
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &albumR{}
-			}
-
-			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
-					continue Outer
-				}
-			}
-
-			args = append(args, obj.ID)
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(
-		qm.From(`wishlist`),
-		qm.WhereIn(`wishlist.album_id in ?`, args...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load wishlist")
-	}
-
-	var resultSlice []*Wishlist
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice wishlist")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on wishlist")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for wishlist")
-	}
-
-	if len(wishlistAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-	if singular {
-		object.R.Wishlists = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &wishlistR{}
-			}
-			foreign.R.Album = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.AlbumID) {
-				local.R.Wishlists = append(local.R.Wishlists, foreign)
-				if foreign.R == nil {
-					foreign.R = &wishlistR{}
-				}
-				foreign.R.Album = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 // SetArtist of the album to the related item.
 // Sets o.R.Artist to related.
 // Adds o to related.R.Albums.
-func (o *Album) SetArtist(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Artist) error {
+func (o *Album) SetArtist(exec boil.Executor, insert bool, related *Artist) error {
 	var err error
 	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+		if err = related.Insert(exec, boil.Infer()); err != nil {
 			return errors.Wrap(err, "failed to insert into foreign table")
 		}
 	}
@@ -891,16 +687,15 @@ func (o *Album) SetArtist(ctx context.Context, exec boil.ContextExecutor, insert
 	)
 	values := []interface{}{related.ID, o.ID}
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, updateQuery)
+		fmt.Fprintln(boil.DebugWriter, values)
 	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+	if _, err = exec.Exec(updateQuery, values...); err != nil {
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.ArtistID, related.ID)
+	o.ArtistID = related.ID
 	if o.R == nil {
 		o.R = &albumR{
 			Artist: related,
@@ -920,49 +715,16 @@ func (o *Album) SetArtist(ctx context.Context, exec boil.ContextExecutor, insert
 	return nil
 }
 
-// RemoveArtist relationship.
-// Sets o.R.Artist to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Album) RemoveArtist(ctx context.Context, exec boil.ContextExecutor, related *Artist) error {
-	var err error
-
-	queries.SetScanner(&o.ArtistID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("artist_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.Artist = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Albums {
-		if queries.Equal(o.ArtistID, ri.ArtistID) {
-			continue
-		}
-
-		ln := len(related.R.Albums)
-		if ln > 1 && i < ln-1 {
-			related.R.Albums[i] = related.R.Albums[ln-1]
-		}
-		related.R.Albums = related.R.Albums[:ln-1]
-		break
-	}
-	return nil
-}
-
 // AddCollections adds the given related objects to the existing relationships
 // of the album, optionally inserting them as new records.
 // Appends related to o.R.Collections.
 // Sets related.R.Album appropriately.
-func (o *Album) AddCollections(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Collection) error {
+func (o *Album) AddCollections(exec boil.Executor, insert bool, related ...*Collection) error {
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.AlbumID, o.ID)
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+			rel.AlbumID = o.ID
+			if err = rel.Insert(exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
 		} else {
@@ -973,16 +735,15 @@ func (o *Album) AddCollections(ctx context.Context, exec boil.ContextExecutor, i
 			)
 			values := []interface{}{o.ID, rel.ID}
 
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
+			if boil.DebugMode {
+				fmt.Fprintln(boil.DebugWriter, updateQuery)
+				fmt.Fprintln(boil.DebugWriter, values)
 			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			if _, err = exec.Exec(updateQuery, values...); err != nil {
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.AlbumID, o.ID)
+			rel.AlbumID = o.ID
 		}
 	}
 
@@ -1006,207 +767,6 @@ func (o *Album) AddCollections(ctx context.Context, exec boil.ContextExecutor, i
 	return nil
 }
 
-// SetCollections removes all previously related items of the
-// album replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.Album's Collections accordingly.
-// Replaces o.R.Collections with related.
-// Sets related.R.Album's Collections accordingly.
-func (o *Album) SetCollections(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Collection) error {
-	query := "update \"collection\" set \"album_id\" = null where \"album_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.Collections {
-			queries.SetScanner(&rel.AlbumID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.Album = nil
-		}
-		o.R.Collections = nil
-	}
-
-	return o.AddCollections(ctx, exec, insert, related...)
-}
-
-// RemoveCollections relationships from objects passed in.
-// Removes related items from R.Collections (uses pointer comparison, removal does not keep order)
-// Sets related.R.Album.
-func (o *Album) RemoveCollections(ctx context.Context, exec boil.ContextExecutor, related ...*Collection) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.AlbumID, nil)
-		if rel.R != nil {
-			rel.R.Album = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("album_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.Collections {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.Collections)
-			if ln > 1 && i < ln-1 {
-				o.R.Collections[i] = o.R.Collections[ln-1]
-			}
-			o.R.Collections = o.R.Collections[:ln-1]
-			break
-		}
-	}
-
-	return nil
-}
-
-// AddWishlists adds the given related objects to the existing relationships
-// of the album, optionally inserting them as new records.
-// Appends related to o.R.Wishlists.
-// Sets related.R.Album appropriately.
-func (o *Album) AddWishlists(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Wishlist) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			queries.Assign(&rel.AlbumID, o.ID)
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"wishlist\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"album_id"}),
-				strmangle.WhereClause("\"", "\"", 2, wishlistPrimaryKeyColumns),
-			)
-			values := []interface{}{o.ID, rel.ID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			queries.Assign(&rel.AlbumID, o.ID)
-		}
-	}
-
-	if o.R == nil {
-		o.R = &albumR{
-			Wishlists: related,
-		}
-	} else {
-		o.R.Wishlists = append(o.R.Wishlists, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &wishlistR{
-				Album: o,
-			}
-		} else {
-			rel.R.Album = o
-		}
-	}
-	return nil
-}
-
-// SetWishlists removes all previously related items of the
-// album replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.Album's Wishlists accordingly.
-// Replaces o.R.Wishlists with related.
-// Sets related.R.Album's Wishlists accordingly.
-func (o *Album) SetWishlists(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Wishlist) error {
-	query := "update \"wishlist\" set \"album_id\" = null where \"album_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.Wishlists {
-			queries.SetScanner(&rel.AlbumID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.Album = nil
-		}
-		o.R.Wishlists = nil
-	}
-
-	return o.AddWishlists(ctx, exec, insert, related...)
-}
-
-// RemoveWishlists relationships from objects passed in.
-// Removes related items from R.Wishlists (uses pointer comparison, removal does not keep order)
-// Sets related.R.Album.
-func (o *Album) RemoveWishlists(ctx context.Context, exec boil.ContextExecutor, related ...*Wishlist) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.AlbumID, nil)
-		if rel.R != nil {
-			rel.R.Album = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("album_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.Wishlists {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.Wishlists)
-			if ln > 1 && i < ln-1 {
-				o.R.Wishlists[i] = o.R.Wishlists[ln-1]
-			}
-			o.R.Wishlists = o.R.Wishlists[:ln-1]
-			break
-		}
-	}
-
-	return nil
-}
-
 // Albums retrieves all the records using an executor.
 func Albums(mods ...qm.QueryMod) albumQuery {
 	mods = append(mods, qm.From("\"albums\""))
@@ -1215,7 +775,7 @@ func Albums(mods ...qm.QueryMod) albumQuery {
 
 // FindAlbum retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindAlbum(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Album, error) {
+func FindAlbum(exec boil.Executor, iD int, selectCols ...string) (*Album, error) {
 	albumObj := &Album{}
 
 	sel := "*"
@@ -1228,7 +788,7 @@ func FindAlbum(ctx context.Context, exec boil.ContextExecutor, iD int, selectCol
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, albumObj)
+	err := q.Bind(nil, exec, albumObj)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
@@ -1236,7 +796,7 @@ func FindAlbum(ctx context.Context, exec boil.ContextExecutor, iD int, selectCol
 		return nil, errors.Wrap(err, "models: unable to select from albums")
 	}
 
-	if err = albumObj.doAfterSelectHooks(ctx, exec); err != nil {
+	if err = albumObj.doAfterSelectHooks(exec); err != nil {
 		return albumObj, err
 	}
 
@@ -1245,14 +805,14 @@ func FindAlbum(ctx context.Context, exec boil.ContextExecutor, iD int, selectCol
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *Album) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *Album) Insert(exec boil.Executor, columns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no albums provided for insertion")
 	}
 
 	var err error
 
-	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
+	if err := o.doBeforeInsertHooks(exec); err != nil {
 		return err
 	}
 
@@ -1297,16 +857,15 @@ func (o *Album) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, vals)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, vals)
 	}
 
 	if len(cache.retMapping) != 0 {
-		err = exec.QueryRowContext(ctx, cache.query, vals...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
+		err = exec.QueryRow(cache.query, vals...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	} else {
-		_, err = exec.ExecContext(ctx, cache.query, vals...)
+		_, err = exec.Exec(cache.query, vals...)
 	}
 
 	if err != nil {
@@ -1319,15 +878,15 @@ func (o *Album) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 		albumInsertCacheMut.Unlock()
 	}
 
-	return o.doAfterInsertHooks(ctx, exec)
+	return o.doAfterInsertHooks(exec)
 }
 
 // Update uses an executor to update the Album.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *Album) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *Album) Update(exec boil.Executor, columns boil.Columns) (int64, error) {
 	var err error
-	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
+	if err = o.doBeforeUpdateHooks(exec); err != nil {
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
@@ -1360,13 +919,12 @@ func (o *Album) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 
 	values := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), cache.valueMapping)
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, values)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, values)
 	}
 	var result sql.Result
-	result, err = exec.ExecContext(ctx, cache.query, values...)
+	result, err = exec.Exec(cache.query, values...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update albums row")
 	}
@@ -1382,14 +940,14 @@ func (o *Album) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 		albumUpdateCacheMut.Unlock()
 	}
 
-	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
+	return rowsAff, o.doAfterUpdateHooks(exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q albumQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q albumQuery) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
-	result, err := q.Query.ExecContext(ctx, exec)
+	result, err := q.Query.Exec(exec)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update all for albums")
 	}
@@ -1403,7 +961,7 @@ func (q albumQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o AlbumSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o AlbumSlice) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -1433,12 +991,11 @@ func (o AlbumSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, albumPrimaryKeyColumns, len(o)))
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args...)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args...)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update all in album slice")
 	}
@@ -1452,12 +1009,12 @@ func (o AlbumSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *Album) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+func (o *Album) Upsert(exec boil.Executor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no albums provided for upsert")
 	}
 
-	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
+	if err := o.doBeforeUpsertHooks(exec); err != nil {
 		return err
 	}
 
@@ -1540,18 +1097,17 @@ func (o *Album) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, vals)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, vals)
 	}
 	if len(cache.retMapping) != 0 {
-		err = exec.QueryRowContext(ctx, cache.query, vals...).Scan(returns...)
+		err = exec.QueryRow(cache.query, vals...).Scan(returns...)
 		if errors.Is(err, sql.ErrNoRows) {
 			err = nil // Postgres doesn't return anything when there's no update
 		}
 	} else {
-		_, err = exec.ExecContext(ctx, cache.query, vals...)
+		_, err = exec.Exec(cache.query, vals...)
 	}
 	if err != nil {
 		return errors.Wrap(err, "models: unable to upsert albums")
@@ -1563,29 +1119,28 @@ func (o *Album) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 		albumUpsertCacheMut.Unlock()
 	}
 
-	return o.doAfterUpsertHooks(ctx, exec)
+	return o.doAfterUpsertHooks(exec)
 }
 
 // Delete deletes a single Album record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Album) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Album) Delete(exec boil.Executor) (int64, error) {
 	if o == nil {
 		return 0, errors.New("models: no Album provided for delete")
 	}
 
-	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
+	if err := o.doBeforeDeleteHooks(exec); err != nil {
 		return 0, err
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), albumPrimaryKeyMapping)
 	sql := "DELETE FROM \"albums\" WHERE \"id\"=$1"
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args...)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args...)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete from albums")
 	}
@@ -1595,7 +1150,7 @@ func (o *Album) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for albums")
 	}
 
-	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
+	if err := o.doAfterDeleteHooks(exec); err != nil {
 		return 0, err
 	}
 
@@ -1603,14 +1158,14 @@ func (o *Album) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 }
 
 // DeleteAll deletes all matching rows.
-func (q albumQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q albumQuery) DeleteAll(exec boil.Executor) (int64, error) {
 	if q.Query == nil {
 		return 0, errors.New("models: no albumQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
-	result, err := q.Query.ExecContext(ctx, exec)
+	result, err := q.Query.Exec(exec)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete all from albums")
 	}
@@ -1624,14 +1179,14 @@ func (q albumQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o AlbumSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o AlbumSlice) DeleteAll(exec boil.Executor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
 	if len(albumBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
+			if err := obj.doBeforeDeleteHooks(exec); err != nil {
 				return 0, err
 			}
 		}
@@ -1646,12 +1201,11 @@ func (o AlbumSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 	sql := "DELETE FROM \"albums\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, albumPrimaryKeyColumns, len(o))
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete all from album slice")
 	}
@@ -1663,7 +1217,7 @@ func (o AlbumSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 
 	if len(albumAfterDeleteHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
+			if err := obj.doAfterDeleteHooks(exec); err != nil {
 				return 0, err
 			}
 		}
@@ -1674,8 +1228,8 @@ func (o AlbumSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *Album) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindAlbum(ctx, exec, o.ID)
+func (o *Album) Reload(exec boil.Executor) error {
+	ret, err := FindAlbum(exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1686,7 +1240,7 @@ func (o *Album) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *AlbumSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *AlbumSlice) ReloadAll(exec boil.Executor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
@@ -1703,7 +1257,7 @@ func (o *AlbumSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 
 	q := queries.Raw(sql, args...)
 
-	err := q.Bind(ctx, exec, &slice)
+	err := q.Bind(nil, exec, &slice)
 	if err != nil {
 		return errors.Wrap(err, "models: unable to reload all in AlbumSlice")
 	}
@@ -1714,16 +1268,15 @@ func (o *AlbumSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 }
 
 // AlbumExists checks if the Album row exists.
-func AlbumExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+func AlbumExists(exec boil.Executor, iD int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"albums\" where \"id\"=$1 limit 1)"
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, iD)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, iD)
 	}
-	row := exec.QueryRowContext(ctx, sql, iD)
+	row := exec.QueryRow(sql, iD)
 
 	err := row.Scan(&exists)
 	if err != nil {

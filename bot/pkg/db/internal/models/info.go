@@ -4,7 +4,6 @@
 package models
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"reflect"
@@ -14,7 +13,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,8 +22,8 @@ import (
 
 // Info is an object representing the database table.
 type Info struct {
-	OnerowID  bool        `boil:"onerow_id" json:"onerow_id" toml:"onerow_id" yaml:"onerow_id"`
-	Starttime null.String `boil:"starttime" json:"starttime,omitempty" toml:"starttime" yaml:"starttime,omitempty"`
+	OnerowID  bool   `boil:"onerow_id" json:"onerow_id" toml:"onerow_id" yaml:"onerow_id"`
+	Starttime string `boil:"starttime" json:"starttime" toml:"starttime" yaml:"starttime"`
 
 	R *infoR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L infoL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -49,21 +47,12 @@ var InfoTableColumns = struct {
 
 // Generated where
 
-type whereHelperbool struct{ field string }
-
-func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-
 var InfoWhere = struct {
 	OnerowID  whereHelperbool
-	Starttime whereHelpernull_String
+	Starttime whereHelperstring
 }{
 	OnerowID:  whereHelperbool{field: "\"info\".\"onerow_id\""},
-	Starttime: whereHelpernull_String{field: "\"info\".\"starttime\""},
+	Starttime: whereHelperstring{field: "\"info\".\"starttime\""},
 }
 
 // InfoRels is where relationship names are stored.
@@ -84,8 +73,8 @@ type infoL struct{}
 
 var (
 	infoAllColumns            = []string{"onerow_id", "starttime"}
-	infoColumnsWithoutDefault = []string{}
-	infoColumnsWithDefault    = []string{"onerow_id", "starttime"}
+	infoColumnsWithoutDefault = []string{"starttime"}
+	infoColumnsWithDefault    = []string{"onerow_id"}
 	infoPrimaryKeyColumns     = []string{"onerow_id"}
 	infoGeneratedColumns      = []string{}
 )
@@ -95,7 +84,7 @@ type (
 	// This should almost always be used instead of []Info.
 	InfoSlice []*Info
 	// InfoHook is the signature for custom Info hook methods
-	InfoHook func(context.Context, boil.ContextExecutor, *Info) error
+	InfoHook func(boil.Executor, *Info) error
 
 	infoQuery struct {
 		*queries.Query
@@ -138,13 +127,9 @@ var infoBeforeUpsertHooks []InfoHook
 var infoAfterUpsertHooks []InfoHook
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *Info) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Info) doAfterSelectHooks(exec boil.Executor) (err error) {
 	for _, hook := range infoAfterSelectHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -153,13 +138,9 @@ func (o *Info) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *Info) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Info) doBeforeInsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range infoBeforeInsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -168,13 +149,9 @@ func (o *Info) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *Info) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Info) doAfterInsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range infoAfterInsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -183,13 +160,9 @@ func (o *Info) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *Info) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Info) doBeforeUpdateHooks(exec boil.Executor) (err error) {
 	for _, hook := range infoBeforeUpdateHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -198,13 +171,9 @@ func (o *Info) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *Info) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Info) doAfterUpdateHooks(exec boil.Executor) (err error) {
 	for _, hook := range infoAfterUpdateHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -213,13 +182,9 @@ func (o *Info) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *Info) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Info) doBeforeDeleteHooks(exec boil.Executor) (err error) {
 	for _, hook := range infoBeforeDeleteHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -228,13 +193,9 @@ func (o *Info) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *Info) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Info) doAfterDeleteHooks(exec boil.Executor) (err error) {
 	for _, hook := range infoAfterDeleteHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -243,13 +204,9 @@ func (o *Info) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *Info) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Info) doBeforeUpsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range infoBeforeUpsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -258,13 +215,9 @@ func (o *Info) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *Info) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Info) doAfterUpsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range infoAfterUpsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -297,12 +250,12 @@ func AddInfoHook(hookPoint boil.HookPoint, infoHook InfoHook) {
 }
 
 // One returns a single info record from the query.
-func (q infoQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Info, error) {
+func (q infoQuery) One(exec boil.Executor) (*Info, error) {
 	o := &Info{}
 
 	queries.SetLimit(q.Query, 1)
 
-	err := q.Bind(ctx, exec, o)
+	err := q.Bind(nil, exec, o)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
@@ -310,7 +263,7 @@ func (q infoQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Info, e
 		return nil, errors.Wrap(err, "models: failed to execute a one query for info")
 	}
 
-	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
+	if err := o.doAfterSelectHooks(exec); err != nil {
 		return o, err
 	}
 
@@ -318,17 +271,17 @@ func (q infoQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Info, e
 }
 
 // All returns all Info records from the query.
-func (q infoQuery) All(ctx context.Context, exec boil.ContextExecutor) (InfoSlice, error) {
+func (q infoQuery) All(exec boil.Executor) (InfoSlice, error) {
 	var o []*Info
 
-	err := q.Bind(ctx, exec, &o)
+	err := q.Bind(nil, exec, &o)
 	if err != nil {
 		return nil, errors.Wrap(err, "models: failed to assign all query results to Info slice")
 	}
 
 	if len(infoAfterSelectHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
+			if err := obj.doAfterSelectHooks(exec); err != nil {
 				return o, err
 			}
 		}
@@ -338,13 +291,13 @@ func (q infoQuery) All(ctx context.Context, exec boil.ContextExecutor) (InfoSlic
 }
 
 // Count returns the count of all Info records in the query.
-func (q infoQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q infoQuery) Count(exec boil.Executor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
 	queries.SetCount(q.Query)
 
-	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
+	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: failed to count info rows")
 	}
@@ -353,14 +306,14 @@ func (q infoQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64,
 }
 
 // Exists checks if the row exists in the table.
-func (q infoQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q infoQuery) Exists(exec boil.Executor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
 	queries.SetCount(q.Query)
 	queries.SetLimit(q.Query, 1)
 
-	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
+	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
 		return false, errors.Wrap(err, "models: failed to check if info exists")
 	}
@@ -376,7 +329,7 @@ func Infos(mods ...qm.QueryMod) infoQuery {
 
 // FindInfo retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindInfo(ctx context.Context, exec boil.ContextExecutor, onerowID bool, selectCols ...string) (*Info, error) {
+func FindInfo(exec boil.Executor, onerowID bool, selectCols ...string) (*Info, error) {
 	infoObj := &Info{}
 
 	sel := "*"
@@ -389,7 +342,7 @@ func FindInfo(ctx context.Context, exec boil.ContextExecutor, onerowID bool, sel
 
 	q := queries.Raw(query, onerowID)
 
-	err := q.Bind(ctx, exec, infoObj)
+	err := q.Bind(nil, exec, infoObj)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
@@ -397,7 +350,7 @@ func FindInfo(ctx context.Context, exec boil.ContextExecutor, onerowID bool, sel
 		return nil, errors.Wrap(err, "models: unable to select from info")
 	}
 
-	if err = infoObj.doAfterSelectHooks(ctx, exec); err != nil {
+	if err = infoObj.doAfterSelectHooks(exec); err != nil {
 		return infoObj, err
 	}
 
@@ -406,14 +359,14 @@ func FindInfo(ctx context.Context, exec boil.ContextExecutor, onerowID bool, sel
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *Info) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *Info) Insert(exec boil.Executor, columns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no info provided for insertion")
 	}
 
 	var err error
 
-	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
+	if err := o.doBeforeInsertHooks(exec); err != nil {
 		return err
 	}
 
@@ -458,16 +411,15 @@ func (o *Info) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, vals)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, vals)
 	}
 
 	if len(cache.retMapping) != 0 {
-		err = exec.QueryRowContext(ctx, cache.query, vals...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
+		err = exec.QueryRow(cache.query, vals...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	} else {
-		_, err = exec.ExecContext(ctx, cache.query, vals...)
+		_, err = exec.Exec(cache.query, vals...)
 	}
 
 	if err != nil {
@@ -480,15 +432,15 @@ func (o *Info) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 		infoInsertCacheMut.Unlock()
 	}
 
-	return o.doAfterInsertHooks(ctx, exec)
+	return o.doAfterInsertHooks(exec)
 }
 
 // Update uses an executor to update the Info.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *Info) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *Info) Update(exec boil.Executor, columns boil.Columns) (int64, error) {
 	var err error
-	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
+	if err = o.doBeforeUpdateHooks(exec); err != nil {
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
@@ -521,13 +473,12 @@ func (o *Info) Update(ctx context.Context, exec boil.ContextExecutor, columns bo
 
 	values := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), cache.valueMapping)
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, values)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, values)
 	}
 	var result sql.Result
-	result, err = exec.ExecContext(ctx, cache.query, values...)
+	result, err = exec.Exec(cache.query, values...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update info row")
 	}
@@ -543,14 +494,14 @@ func (o *Info) Update(ctx context.Context, exec boil.ContextExecutor, columns bo
 		infoUpdateCacheMut.Unlock()
 	}
 
-	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
+	return rowsAff, o.doAfterUpdateHooks(exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q infoQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q infoQuery) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
-	result, err := q.Query.ExecContext(ctx, exec)
+	result, err := q.Query.Exec(exec)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update all for info")
 	}
@@ -564,7 +515,7 @@ func (q infoQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o InfoSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o InfoSlice) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -594,12 +545,11 @@ func (o InfoSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, infoPrimaryKeyColumns, len(o)))
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args...)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args...)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update all in info slice")
 	}
@@ -613,12 +563,12 @@ func (o InfoSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *Info) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+func (o *Info) Upsert(exec boil.Executor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no info provided for upsert")
 	}
 
-	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
+	if err := o.doBeforeUpsertHooks(exec); err != nil {
 		return err
 	}
 
@@ -701,18 +651,17 @@ func (o *Info) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, vals)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, vals)
 	}
 	if len(cache.retMapping) != 0 {
-		err = exec.QueryRowContext(ctx, cache.query, vals...).Scan(returns...)
+		err = exec.QueryRow(cache.query, vals...).Scan(returns...)
 		if errors.Is(err, sql.ErrNoRows) {
 			err = nil // Postgres doesn't return anything when there's no update
 		}
 	} else {
-		_, err = exec.ExecContext(ctx, cache.query, vals...)
+		_, err = exec.Exec(cache.query, vals...)
 	}
 	if err != nil {
 		return errors.Wrap(err, "models: unable to upsert info")
@@ -724,29 +673,28 @@ func (o *Info) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 		infoUpsertCacheMut.Unlock()
 	}
 
-	return o.doAfterUpsertHooks(ctx, exec)
+	return o.doAfterUpsertHooks(exec)
 }
 
 // Delete deletes a single Info record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Info) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Info) Delete(exec boil.Executor) (int64, error) {
 	if o == nil {
 		return 0, errors.New("models: no Info provided for delete")
 	}
 
-	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
+	if err := o.doBeforeDeleteHooks(exec); err != nil {
 		return 0, err
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), infoPrimaryKeyMapping)
 	sql := "DELETE FROM \"info\" WHERE \"onerow_id\"=$1"
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args...)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args...)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete from info")
 	}
@@ -756,7 +704,7 @@ func (o *Info) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for info")
 	}
 
-	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
+	if err := o.doAfterDeleteHooks(exec); err != nil {
 		return 0, err
 	}
 
@@ -764,14 +712,14 @@ func (o *Info) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 }
 
 // DeleteAll deletes all matching rows.
-func (q infoQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q infoQuery) DeleteAll(exec boil.Executor) (int64, error) {
 	if q.Query == nil {
 		return 0, errors.New("models: no infoQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
-	result, err := q.Query.ExecContext(ctx, exec)
+	result, err := q.Query.Exec(exec)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete all from info")
 	}
@@ -785,14 +733,14 @@ func (q infoQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o InfoSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o InfoSlice) DeleteAll(exec boil.Executor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
 	if len(infoBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
+			if err := obj.doBeforeDeleteHooks(exec); err != nil {
 				return 0, err
 			}
 		}
@@ -807,12 +755,11 @@ func (o InfoSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 	sql := "DELETE FROM \"info\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, infoPrimaryKeyColumns, len(o))
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete all from info slice")
 	}
@@ -824,7 +771,7 @@ func (o InfoSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 
 	if len(infoAfterDeleteHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
+			if err := obj.doAfterDeleteHooks(exec); err != nil {
 				return 0, err
 			}
 		}
@@ -835,8 +782,8 @@ func (o InfoSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *Info) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindInfo(ctx, exec, o.OnerowID)
+func (o *Info) Reload(exec boil.Executor) error {
+	ret, err := FindInfo(exec, o.OnerowID)
 	if err != nil {
 		return err
 	}
@@ -847,7 +794,7 @@ func (o *Info) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *InfoSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *InfoSlice) ReloadAll(exec boil.Executor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
@@ -864,7 +811,7 @@ func (o *InfoSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 
 	q := queries.Raw(sql, args...)
 
-	err := q.Bind(ctx, exec, &slice)
+	err := q.Bind(nil, exec, &slice)
 	if err != nil {
 		return errors.Wrap(err, "models: unable to reload all in InfoSlice")
 	}
@@ -875,16 +822,15 @@ func (o *InfoSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 }
 
 // InfoExists checks if the Info row exists.
-func InfoExists(ctx context.Context, exec boil.ContextExecutor, onerowID bool) (bool, error) {
+func InfoExists(exec boil.Executor, onerowID bool) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"info\" where \"onerow_id\"=$1 limit 1)"
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, onerowID)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, onerowID)
 	}
-	row := exec.QueryRowContext(ctx, sql, onerowID)
+	row := exec.QueryRow(sql, onerowID)
 
 	err := row.Scan(&exists)
 	if err != nil {

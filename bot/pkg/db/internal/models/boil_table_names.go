@@ -10,7 +10,6 @@ var TableNames = struct {
 	Info       string
 	Locations  string
 	Users      string
-	Wishlist   string
 }{
 	Albums:     "albums",
 	Artists:    "artists",
@@ -18,5 +17,4 @@ var TableNames = struct {
 	Info:       "info",
 	Locations:  "locations",
 	Users:      "users",
-	Wishlist:   "wishlist",
 }

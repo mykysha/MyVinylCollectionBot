@@ -25,7 +25,6 @@ update-gomod:
 download-gomod:
 	go get -u github.com/spf13/viper
 	go get -u github.com/volatiletech/sqlboiler/v4
-	go get -u github.com/volatiletech/null/v8
 	go get -u github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@latest
 	go get -u github.com/kat-co/vala
 

@@ -7,7 +7,7 @@ type Info struct {
 }
 
 type User struct {
-	ChatID   int
+	ChatID   string
 	UserName string
 }
 

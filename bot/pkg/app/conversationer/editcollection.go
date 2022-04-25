@@ -76,7 +76,7 @@ func (c Conversationer) Adder(msg messenger.ReceiveMessage) (bool, messenger.Sen
 
 	location := entities.Location{
 		Owner: entities.User{
-			ChatID:   int(msg.ChatID),
+			ChatID:   strconv.FormatInt(msg.ChatID, 10),
 			UserName: msg.UserName,
 		},
 		Name: args[7],

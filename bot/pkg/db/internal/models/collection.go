@@ -4,7 +4,6 @@
 package models
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"reflect"
@@ -14,7 +13,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -24,9 +22,9 @@ import (
 
 // Collection is an object representing the database table.
 type Collection struct {
-	ID         int      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	AlbumID    null.Int `boil:"album_id" json:"album_id,omitempty" toml:"album_id" yaml:"album_id,omitempty"`
-	LocationID null.Int `boil:"location_id" json:"location_id,omitempty" toml:"location_id" yaml:"location_id,omitempty"`
+	ID         int `boil:"id" json:"id" toml:"id" yaml:"id"`
+	AlbumID    int `boil:"album_id" json:"album_id" toml:"album_id" yaml:"album_id"`
+	LocationID int `boil:"location_id" json:"location_id" toml:"location_id" yaml:"location_id"`
 
 	R *collectionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L collectionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -56,12 +54,12 @@ var CollectionTableColumns = struct {
 
 var CollectionWhere = struct {
 	ID         whereHelperint
-	AlbumID    whereHelpernull_Int
-	LocationID whereHelpernull_Int
+	AlbumID    whereHelperint
+	LocationID whereHelperint
 }{
 	ID:         whereHelperint{field: "\"collection\".\"id\""},
-	AlbumID:    whereHelpernull_Int{field: "\"collection\".\"album_id\""},
-	LocationID: whereHelpernull_Int{field: "\"collection\".\"location_id\""},
+	AlbumID:    whereHelperint{field: "\"collection\".\"album_id\""},
+	LocationID: whereHelperint{field: "\"collection\".\"location_id\""},
 }
 
 // CollectionRels is where relationship names are stored.
@@ -89,8 +87,8 @@ type collectionL struct{}
 
 var (
 	collectionAllColumns            = []string{"id", "album_id", "location_id"}
-	collectionColumnsWithoutDefault = []string{}
-	collectionColumnsWithDefault    = []string{"id", "album_id", "location_id"}
+	collectionColumnsWithoutDefault = []string{"album_id", "location_id"}
+	collectionColumnsWithDefault    = []string{"id"}
 	collectionPrimaryKeyColumns     = []string{"id"}
 	collectionGeneratedColumns      = []string{}
 )
@@ -100,7 +98,7 @@ type (
 	// This should almost always be used instead of []Collection.
 	CollectionSlice []*Collection
 	// CollectionHook is the signature for custom Collection hook methods
-	CollectionHook func(context.Context, boil.ContextExecutor, *Collection) error
+	CollectionHook func(boil.Executor, *Collection) error
 
 	collectionQuery struct {
 		*queries.Query
@@ -143,13 +141,9 @@ var collectionBeforeUpsertHooks []CollectionHook
 var collectionAfterUpsertHooks []CollectionHook
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *Collection) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Collection) doAfterSelectHooks(exec boil.Executor) (err error) {
 	for _, hook := range collectionAfterSelectHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -158,13 +152,9 @@ func (o *Collection) doAfterSelectHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *Collection) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Collection) doBeforeInsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range collectionBeforeInsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -173,13 +163,9 @@ func (o *Collection) doBeforeInsertHooks(ctx context.Context, exec boil.ContextE
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *Collection) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Collection) doAfterInsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range collectionAfterInsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -188,13 +174,9 @@ func (o *Collection) doAfterInsertHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *Collection) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Collection) doBeforeUpdateHooks(exec boil.Executor) (err error) {
 	for _, hook := range collectionBeforeUpdateHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -203,13 +185,9 @@ func (o *Collection) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextE
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *Collection) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Collection) doAfterUpdateHooks(exec boil.Executor) (err error) {
 	for _, hook := range collectionAfterUpdateHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -218,13 +196,9 @@ func (o *Collection) doAfterUpdateHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *Collection) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Collection) doBeforeDeleteHooks(exec boil.Executor) (err error) {
 	for _, hook := range collectionBeforeDeleteHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -233,13 +207,9 @@ func (o *Collection) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextE
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *Collection) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Collection) doAfterDeleteHooks(exec boil.Executor) (err error) {
 	for _, hook := range collectionAfterDeleteHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -248,13 +218,9 @@ func (o *Collection) doAfterDeleteHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *Collection) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Collection) doBeforeUpsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range collectionBeforeUpsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -263,13 +229,9 @@ func (o *Collection) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextE
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *Collection) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
+func (o *Collection) doAfterUpsertHooks(exec boil.Executor) (err error) {
 	for _, hook := range collectionAfterUpsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
+		if err := hook(exec, o); err != nil {
 			return err
 		}
 	}
@@ -302,12 +264,12 @@ func AddCollectionHook(hookPoint boil.HookPoint, collectionHook CollectionHook) 
 }
 
 // One returns a single collection record from the query.
-func (q collectionQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Collection, error) {
+func (q collectionQuery) One(exec boil.Executor) (*Collection, error) {
 	o := &Collection{}
 
 	queries.SetLimit(q.Query, 1)
 
-	err := q.Bind(ctx, exec, o)
+	err := q.Bind(nil, exec, o)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
@@ -315,7 +277,7 @@ func (q collectionQuery) One(ctx context.Context, exec boil.ContextExecutor) (*C
 		return nil, errors.Wrap(err, "models: failed to execute a one query for collection")
 	}
 
-	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
+	if err := o.doAfterSelectHooks(exec); err != nil {
 		return o, err
 	}
 
@@ -323,17 +285,17 @@ func (q collectionQuery) One(ctx context.Context, exec boil.ContextExecutor) (*C
 }
 
 // All returns all Collection records from the query.
-func (q collectionQuery) All(ctx context.Context, exec boil.ContextExecutor) (CollectionSlice, error) {
+func (q collectionQuery) All(exec boil.Executor) (CollectionSlice, error) {
 	var o []*Collection
 
-	err := q.Bind(ctx, exec, &o)
+	err := q.Bind(nil, exec, &o)
 	if err != nil {
 		return nil, errors.Wrap(err, "models: failed to assign all query results to Collection slice")
 	}
 
 	if len(collectionAfterSelectHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
+			if err := obj.doAfterSelectHooks(exec); err != nil {
 				return o, err
 			}
 		}
@@ -343,13 +305,13 @@ func (q collectionQuery) All(ctx context.Context, exec boil.ContextExecutor) (Co
 }
 
 // Count returns the count of all Collection records in the query.
-func (q collectionQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q collectionQuery) Count(exec boil.Executor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
 	queries.SetCount(q.Query)
 
-	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
+	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: failed to count collection rows")
 	}
@@ -358,14 +320,14 @@ func (q collectionQuery) Count(ctx context.Context, exec boil.ContextExecutor) (
 }
 
 // Exists checks if the row exists in the table.
-func (q collectionQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q collectionQuery) Exists(exec boil.Executor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
 	queries.SetCount(q.Query)
 	queries.SetLimit(q.Query, 1)
 
-	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
+	err := q.Query.QueryRow(exec).Scan(&count)
 	if err != nil {
 		return false, errors.Wrap(err, "models: failed to check if collection exists")
 	}
@@ -403,7 +365,7 @@ func (o *Collection) Location(mods ...qm.QueryMod) locationQuery {
 
 // LoadAlbum allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (collectionL) LoadAlbum(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCollection interface{}, mods queries.Applicator) error {
+func (collectionL) LoadAlbum(e boil.Executor, singular bool, maybeCollection interface{}, mods queries.Applicator) error {
 	var slice []*Collection
 	var object *Collection
 
@@ -418,9 +380,7 @@ func (collectionL) LoadAlbum(ctx context.Context, e boil.ContextExecutor, singul
 		if object.R == nil {
 			object.R = &collectionR{}
 		}
-		if !queries.IsNil(object.AlbumID) {
-			args = append(args, object.AlbumID)
-		}
+		args = append(args, object.AlbumID)
 
 	} else {
 	Outer:
@@ -430,14 +390,12 @@ func (collectionL) LoadAlbum(ctx context.Context, e boil.ContextExecutor, singul
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.AlbumID) {
+				if a == obj.AlbumID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.AlbumID) {
-				args = append(args, obj.AlbumID)
-			}
+			args = append(args, obj.AlbumID)
 
 		}
 	}
@@ -454,7 +412,7 @@ func (collectionL) LoadAlbum(ctx context.Context, e boil.ContextExecutor, singul
 		mods.Apply(query)
 	}
 
-	results, err := query.QueryContext(ctx, e)
+	results, err := query.Query(e)
 	if err != nil {
 		return errors.Wrap(err, "failed to eager load Album")
 	}
@@ -473,7 +431,7 @@ func (collectionL) LoadAlbum(ctx context.Context, e boil.ContextExecutor, singul
 
 	if len(collectionAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+			if err := obj.doAfterSelectHooks(e); err != nil {
 				return err
 			}
 		}
@@ -495,7 +453,7 @@ func (collectionL) LoadAlbum(ctx context.Context, e boil.ContextExecutor, singul
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.AlbumID, foreign.ID) {
+			if local.AlbumID == foreign.ID {
 				local.R.Album = foreign
 				if foreign.R == nil {
 					foreign.R = &albumR{}
@@ -511,7 +469,7 @@ func (collectionL) LoadAlbum(ctx context.Context, e boil.ContextExecutor, singul
 
 // LoadLocation allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (collectionL) LoadLocation(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCollection interface{}, mods queries.Applicator) error {
+func (collectionL) LoadLocation(e boil.Executor, singular bool, maybeCollection interface{}, mods queries.Applicator) error {
 	var slice []*Collection
 	var object *Collection
 
@@ -526,9 +484,7 @@ func (collectionL) LoadLocation(ctx context.Context, e boil.ContextExecutor, sin
 		if object.R == nil {
 			object.R = &collectionR{}
 		}
-		if !queries.IsNil(object.LocationID) {
-			args = append(args, object.LocationID)
-		}
+		args = append(args, object.LocationID)
 
 	} else {
 	Outer:
@@ -538,14 +494,12 @@ func (collectionL) LoadLocation(ctx context.Context, e boil.ContextExecutor, sin
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.LocationID) {
+				if a == obj.LocationID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.LocationID) {
-				args = append(args, obj.LocationID)
-			}
+			args = append(args, obj.LocationID)
 
 		}
 	}
@@ -562,7 +516,7 @@ func (collectionL) LoadLocation(ctx context.Context, e boil.ContextExecutor, sin
 		mods.Apply(query)
 	}
 
-	results, err := query.QueryContext(ctx, e)
+	results, err := query.Query(e)
 	if err != nil {
 		return errors.Wrap(err, "failed to eager load Location")
 	}
@@ -581,7 +535,7 @@ func (collectionL) LoadLocation(ctx context.Context, e boil.ContextExecutor, sin
 
 	if len(collectionAfterSelectHooks) != 0 {
 		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+			if err := obj.doAfterSelectHooks(e); err != nil {
 				return err
 			}
 		}
@@ -603,7 +557,7 @@ func (collectionL) LoadLocation(ctx context.Context, e boil.ContextExecutor, sin
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.LocationID, foreign.ID) {
+			if local.LocationID == foreign.ID {
 				local.R.Location = foreign
 				if foreign.R == nil {
 					foreign.R = &locationR{}
@@ -620,10 +574,10 @@ func (collectionL) LoadLocation(ctx context.Context, e boil.ContextExecutor, sin
 // SetAlbum of the collection to the related item.
 // Sets o.R.Album to related.
 // Adds o to related.R.Collections.
-func (o *Collection) SetAlbum(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Album) error {
+func (o *Collection) SetAlbum(exec boil.Executor, insert bool, related *Album) error {
 	var err error
 	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+		if err = related.Insert(exec, boil.Infer()); err != nil {
 			return errors.Wrap(err, "failed to insert into foreign table")
 		}
 	}
@@ -635,16 +589,15 @@ func (o *Collection) SetAlbum(ctx context.Context, exec boil.ContextExecutor, in
 	)
 	values := []interface{}{related.ID, o.ID}
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, updateQuery)
+		fmt.Fprintln(boil.DebugWriter, values)
 	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+	if _, err = exec.Exec(updateQuery, values...); err != nil {
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.AlbumID, related.ID)
+	o.AlbumID = related.ID
 	if o.R == nil {
 		o.R = &collectionR{
 			Album: related,
@@ -664,46 +617,13 @@ func (o *Collection) SetAlbum(ctx context.Context, exec boil.ContextExecutor, in
 	return nil
 }
 
-// RemoveAlbum relationship.
-// Sets o.R.Album to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Collection) RemoveAlbum(ctx context.Context, exec boil.ContextExecutor, related *Album) error {
-	var err error
-
-	queries.SetScanner(&o.AlbumID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("album_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.Album = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Collections {
-		if queries.Equal(o.AlbumID, ri.AlbumID) {
-			continue
-		}
-
-		ln := len(related.R.Collections)
-		if ln > 1 && i < ln-1 {
-			related.R.Collections[i] = related.R.Collections[ln-1]
-		}
-		related.R.Collections = related.R.Collections[:ln-1]
-		break
-	}
-	return nil
-}
-
 // SetLocation of the collection to the related item.
 // Sets o.R.Location to related.
 // Adds o to related.R.Collections.
-func (o *Collection) SetLocation(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Location) error {
+func (o *Collection) SetLocation(exec boil.Executor, insert bool, related *Location) error {
 	var err error
 	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+		if err = related.Insert(exec, boil.Infer()); err != nil {
 			return errors.Wrap(err, "failed to insert into foreign table")
 		}
 	}
@@ -715,16 +635,15 @@ func (o *Collection) SetLocation(ctx context.Context, exec boil.ContextExecutor,
 	)
 	values := []interface{}{related.ID, o.ID}
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, updateQuery)
-		fmt.Fprintln(writer, values)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, updateQuery)
+		fmt.Fprintln(boil.DebugWriter, values)
 	}
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+	if _, err = exec.Exec(updateQuery, values...); err != nil {
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.LocationID, related.ID)
+	o.LocationID = related.ID
 	if o.R == nil {
 		o.R = &collectionR{
 			Location: related,
@@ -744,39 +663,6 @@ func (o *Collection) SetLocation(ctx context.Context, exec boil.ContextExecutor,
 	return nil
 }
 
-// RemoveLocation relationship.
-// Sets o.R.Location to nil.
-// Removes o from all passed in related items' relationships struct.
-func (o *Collection) RemoveLocation(ctx context.Context, exec boil.ContextExecutor, related *Location) error {
-	var err error
-
-	queries.SetScanner(&o.LocationID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("location_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.Location = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Collections {
-		if queries.Equal(o.LocationID, ri.LocationID) {
-			continue
-		}
-
-		ln := len(related.R.Collections)
-		if ln > 1 && i < ln-1 {
-			related.R.Collections[i] = related.R.Collections[ln-1]
-		}
-		related.R.Collections = related.R.Collections[:ln-1]
-		break
-	}
-	return nil
-}
-
 // Collections retrieves all the records using an executor.
 func Collections(mods ...qm.QueryMod) collectionQuery {
 	mods = append(mods, qm.From("\"collection\""))
@@ -785,7 +671,7 @@ func Collections(mods ...qm.QueryMod) collectionQuery {
 
 // FindCollection retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindCollection(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Collection, error) {
+func FindCollection(exec boil.Executor, iD int, selectCols ...string) (*Collection, error) {
 	collectionObj := &Collection{}
 
 	sel := "*"
@@ -798,7 +684,7 @@ func FindCollection(ctx context.Context, exec boil.ContextExecutor, iD int, sele
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, collectionObj)
+	err := q.Bind(nil, exec, collectionObj)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
@@ -806,7 +692,7 @@ func FindCollection(ctx context.Context, exec boil.ContextExecutor, iD int, sele
 		return nil, errors.Wrap(err, "models: unable to select from collection")
 	}
 
-	if err = collectionObj.doAfterSelectHooks(ctx, exec); err != nil {
+	if err = collectionObj.doAfterSelectHooks(exec); err != nil {
 		return collectionObj, err
 	}
 
@@ -815,14 +701,14 @@ func FindCollection(ctx context.Context, exec boil.ContextExecutor, iD int, sele
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *Collection) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *Collection) Insert(exec boil.Executor, columns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no collection provided for insertion")
 	}
 
 	var err error
 
-	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
+	if err := o.doBeforeInsertHooks(exec); err != nil {
 		return err
 	}
 
@@ -867,16 +753,15 @@ func (o *Collection) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, vals)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, vals)
 	}
 
 	if len(cache.retMapping) != 0 {
-		err = exec.QueryRowContext(ctx, cache.query, vals...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
+		err = exec.QueryRow(cache.query, vals...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	} else {
-		_, err = exec.ExecContext(ctx, cache.query, vals...)
+		_, err = exec.Exec(cache.query, vals...)
 	}
 
 	if err != nil {
@@ -889,15 +774,15 @@ func (o *Collection) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 		collectionInsertCacheMut.Unlock()
 	}
 
-	return o.doAfterInsertHooks(ctx, exec)
+	return o.doAfterInsertHooks(exec)
 }
 
 // Update uses an executor to update the Collection.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *Collection) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *Collection) Update(exec boil.Executor, columns boil.Columns) (int64, error) {
 	var err error
-	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
+	if err = o.doBeforeUpdateHooks(exec); err != nil {
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
@@ -930,13 +815,12 @@ func (o *Collection) Update(ctx context.Context, exec boil.ContextExecutor, colu
 
 	values := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), cache.valueMapping)
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, values)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, values)
 	}
 	var result sql.Result
-	result, err = exec.ExecContext(ctx, cache.query, values...)
+	result, err = exec.Exec(cache.query, values...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update collection row")
 	}
@@ -952,14 +836,14 @@ func (o *Collection) Update(ctx context.Context, exec boil.ContextExecutor, colu
 		collectionUpdateCacheMut.Unlock()
 	}
 
-	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
+	return rowsAff, o.doAfterUpdateHooks(exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q collectionQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q collectionQuery) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
-	result, err := q.Query.ExecContext(ctx, exec)
+	result, err := q.Query.Exec(exec)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update all for collection")
 	}
@@ -973,7 +857,7 @@ func (q collectionQuery) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o CollectionSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o CollectionSlice) UpdateAll(exec boil.Executor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -1003,12 +887,11 @@ func (o CollectionSlice) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, collectionPrimaryKeyColumns, len(o)))
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args...)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args...)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to update all in collection slice")
 	}
@@ -1022,12 +905,12 @@ func (o CollectionSlice) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *Collection) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+func (o *Collection) Upsert(exec boil.Executor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no collection provided for upsert")
 	}
 
-	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
+	if err := o.doBeforeUpsertHooks(exec); err != nil {
 		return err
 	}
 
@@ -1110,18 +993,17 @@ func (o *Collection) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, cache.query)
-		fmt.Fprintln(writer, vals)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, cache.query)
+		fmt.Fprintln(boil.DebugWriter, vals)
 	}
 	if len(cache.retMapping) != 0 {
-		err = exec.QueryRowContext(ctx, cache.query, vals...).Scan(returns...)
+		err = exec.QueryRow(cache.query, vals...).Scan(returns...)
 		if errors.Is(err, sql.ErrNoRows) {
 			err = nil // Postgres doesn't return anything when there's no update
 		}
 	} else {
-		_, err = exec.ExecContext(ctx, cache.query, vals...)
+		_, err = exec.Exec(cache.query, vals...)
 	}
 	if err != nil {
 		return errors.Wrap(err, "models: unable to upsert collection")
@@ -1133,29 +1015,28 @@ func (o *Collection) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 		collectionUpsertCacheMut.Unlock()
 	}
 
-	return o.doAfterUpsertHooks(ctx, exec)
+	return o.doAfterUpsertHooks(exec)
 }
 
 // Delete deletes a single Collection record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Collection) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Collection) Delete(exec boil.Executor) (int64, error) {
 	if o == nil {
 		return 0, errors.New("models: no Collection provided for delete")
 	}
 
-	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
+	if err := o.doBeforeDeleteHooks(exec); err != nil {
 		return 0, err
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), collectionPrimaryKeyMapping)
 	sql := "DELETE FROM \"collection\" WHERE \"id\"=$1"
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args...)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args...)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete from collection")
 	}
@@ -1165,7 +1046,7 @@ func (o *Collection) Delete(ctx context.Context, exec boil.ContextExecutor) (int
 		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for collection")
 	}
 
-	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
+	if err := o.doAfterDeleteHooks(exec); err != nil {
 		return 0, err
 	}
 
@@ -1173,14 +1054,14 @@ func (o *Collection) Delete(ctx context.Context, exec boil.ContextExecutor) (int
 }
 
 // DeleteAll deletes all matching rows.
-func (q collectionQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q collectionQuery) DeleteAll(exec boil.Executor) (int64, error) {
 	if q.Query == nil {
 		return 0, errors.New("models: no collectionQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
-	result, err := q.Query.ExecContext(ctx, exec)
+	result, err := q.Query.Exec(exec)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete all from collection")
 	}
@@ -1194,14 +1075,14 @@ func (q collectionQuery) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o CollectionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o CollectionSlice) DeleteAll(exec boil.Executor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
 	if len(collectionBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
+			if err := obj.doBeforeDeleteHooks(exec); err != nil {
 				return 0, err
 			}
 		}
@@ -1216,12 +1097,11 @@ func (o CollectionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 	sql := "DELETE FROM \"collection\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, collectionPrimaryKeyColumns, len(o))
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, args)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, args)
 	}
-	result, err := exec.ExecContext(ctx, sql, args...)
+	result, err := exec.Exec(sql, args...)
 	if err != nil {
 		return 0, errors.Wrap(err, "models: unable to delete all from collection slice")
 	}
@@ -1233,7 +1113,7 @@ func (o CollectionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 
 	if len(collectionAfterDeleteHooks) != 0 {
 		for _, obj := range o {
-			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
+			if err := obj.doAfterDeleteHooks(exec); err != nil {
 				return 0, err
 			}
 		}
@@ -1244,8 +1124,8 @@ func (o CollectionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *Collection) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindCollection(ctx, exec, o.ID)
+func (o *Collection) Reload(exec boil.Executor) error {
+	ret, err := FindCollection(exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1256,7 +1136,7 @@ func (o *Collection) Reload(ctx context.Context, exec boil.ContextExecutor) erro
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *CollectionSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *CollectionSlice) ReloadAll(exec boil.Executor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
@@ -1273,7 +1153,7 @@ func (o *CollectionSlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 
 	q := queries.Raw(sql, args...)
 
-	err := q.Bind(ctx, exec, &slice)
+	err := q.Bind(nil, exec, &slice)
 	if err != nil {
 		return errors.Wrap(err, "models: unable to reload all in CollectionSlice")
 	}
@@ -1284,16 +1164,15 @@ func (o *CollectionSlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 }
 
 // CollectionExists checks if the Collection row exists.
-func CollectionExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+func CollectionExists(exec boil.Executor, iD int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"collection\" where \"id\"=$1 limit 1)"
 
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, sql)
-		fmt.Fprintln(writer, iD)
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, iD)
 	}
-	row := exec.QueryRowContext(ctx, sql, iD)
+	row := exec.QueryRow(sql, iD)
 
 	err := row.Scan(&exists)
 	if err != nil {
