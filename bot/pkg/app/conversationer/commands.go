@@ -35,7 +35,7 @@ func (c Conversationer) BotInfoResponser(msg messenger.ReceiveMessage) messenger
 }
 
 func (c Conversationer) ViewGenresResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
-	genres, err := c.database.GetGenres(msg.ChatID)
+	genres, err := c.database.GetGenres(msg.ChatID, msg.UserName)
 	if err != nil {
 		text := "Some error working with database, try again later"
 
@@ -54,7 +54,7 @@ func (c Conversationer) ViewGenresResponser(msg messenger.ReceiveMessage) messen
 }
 
 func (c Conversationer) ViewArtistsResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
-	artists, err := c.database.GetArtists(msg.ChatID)
+	artists, err := c.database.GetArtists(msg.ChatID, msg.UserName)
 	if err != nil {
 		text := "Some error working with database, try again later"
 

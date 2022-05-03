@@ -147,7 +147,7 @@ func (tg TgBot) textToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 
 func (tg TgBot) callbackMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 	return messenger.ReceiveMessage{
-		ChatID:    int64ToString(update.Message.Chat.ID),
+		ChatID:    int64ToString(update.CallbackQuery.From.ID),
 		Text:      update.CallbackQuery.Data,
 		FirstName: update.CallbackQuery.From.FirstName,
 		LastName:  update.CallbackQuery.From.LastName,

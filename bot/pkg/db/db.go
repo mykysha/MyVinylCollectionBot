@@ -74,7 +74,12 @@ func (d Database) AddAlbumToCollection(album entities.Album, location entities.L
 	return nil
 }
 
-func (d Database) GetCollection(userID string) ([]entities.Album, error) {
+func (d Database) GetCollection(userID, userName string) ([]entities.Album, error) {
+	err := d.db.AddUserIfNotExists(userID, userName)
+	if err != nil {
+		return nil, fmt.Errorf("GetCollection: %w", err)
+	}
+
 	var albums []entities.Album
 
 	dbAlbums, err := d.db.GetCollection(userID)
@@ -107,7 +112,12 @@ func (d Database) GetCollection(userID string) ([]entities.Album, error) {
 	return albums, nil
 }
 
-func (d Database) GetGenres(userID string) ([]string, error) {
+func (d Database) GetGenres(userID, userName string) ([]string, error) {
+	err := d.db.AddUserIfNotExists(userID, userName)
+	if err != nil {
+		return nil, fmt.Errorf("GetGenres: %w", err)
+	}
+
 	var genres []string
 
 	dbAlbums, err := d.db.GetCollection(userID)
@@ -122,7 +132,12 @@ func (d Database) GetGenres(userID string) ([]string, error) {
 	return genres, nil
 }
 
-func (d Database) GetArtists(userID string) ([]entities.Artist, error) {
+func (d Database) GetArtists(userID, userName string) ([]entities.Artist, error) {
+	err := d.db.AddUserIfNotExists(userID, userName)
+	if err != nil {
+		return nil, fmt.Errorf("GetArtists: %w", err)
+	}
+
 	var artists []entities.Artist
 
 	dbAlbums, err := d.db.GetCollection(userID)
