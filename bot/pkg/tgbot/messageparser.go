@@ -1,9 +1,15 @@
 package tgbot
 
 import (
+	"strconv"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/nndergunov/tgBot/bot/pkg/domain/messenger"
 )
+
+func int64ToString(num int64) string {
+	return strconv.FormatInt(num, 10)
+}
 
 func (tg TgBot) parseToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 	switch {
@@ -30,7 +36,7 @@ func (tg TgBot) photoToMessage(update tgbotapi.Update) messenger.ReceiveMessage 
 	photo := messenger.NewPhoto(update.Message.Photo[bestQualityPhoto].FileID)
 
 	return messenger.ReceiveMessage{
-		ChatID:    update.Message.Chat.ID,
+		ChatID:    int64ToString(update.Message.Chat.ID),
 		Text:      update.Message.Caption,
 		FirstName: update.Message.Chat.FirstName,
 		LastName:  update.Message.Chat.LastName,
@@ -48,7 +54,7 @@ func (tg TgBot) voiceToMessage(update tgbotapi.Update) messenger.ReceiveMessage 
 	voice := messenger.NewVoice(update.Message.Voice.FileUniqueID)
 
 	return messenger.ReceiveMessage{
-		ChatID:    update.Message.Chat.ID,
+		ChatID:    int64ToString(update.Message.Chat.ID),
 		Text:      update.Message.Caption,
 		FirstName: update.Message.Chat.FirstName,
 		LastName:  update.Message.Chat.LastName,
@@ -66,7 +72,7 @@ func (tg TgBot) videoNoteToMessage(update tgbotapi.Update) messenger.ReceiveMess
 	videoNote := messenger.NewVideoNote(update.Message.VideoNote.FileUniqueID)
 
 	return messenger.ReceiveMessage{
-		ChatID:    update.Message.Chat.ID,
+		ChatID:    int64ToString(update.Message.Chat.ID),
 		Text:      update.Message.Caption,
 		FirstName: update.Message.Chat.FirstName,
 		LastName:  update.Message.Chat.LastName,
@@ -84,7 +90,7 @@ func (tg TgBot) videoToMessage(update tgbotapi.Update) messenger.ReceiveMessage 
 	video := messenger.NewVideo(update.Message.Video.FileUniqueID)
 
 	return messenger.ReceiveMessage{
-		ChatID:    update.Message.Chat.ID,
+		ChatID:    int64ToString(update.Message.Chat.ID),
 		Text:      update.Message.Caption,
 		FirstName: update.Message.Chat.FirstName,
 		LastName:  update.Message.Chat.LastName,
@@ -109,7 +115,7 @@ func (tg TgBot) pollToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 	poll := messenger.NewPoll(update.Message.Poll.Question, options)
 
 	return messenger.ReceiveMessage{
-		ChatID:    update.Message.Chat.ID,
+		ChatID:    int64ToString(update.Message.Chat.ID),
 		Text:      "",
 		FirstName: update.Message.Chat.FirstName,
 		LastName:  update.Message.Chat.LastName,
@@ -125,7 +131,7 @@ func (tg TgBot) pollToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 
 func (tg TgBot) textToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 	return messenger.ReceiveMessage{
-		ChatID:    update.Message.Chat.ID,
+		ChatID:    int64ToString(update.Message.Chat.ID),
 		Text:      update.Message.Text,
 		FirstName: update.Message.Chat.FirstName,
 		LastName:  update.Message.Chat.LastName,
@@ -141,7 +147,7 @@ func (tg TgBot) textToMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 
 func (tg TgBot) callbackMessage(update tgbotapi.Update) messenger.ReceiveMessage {
 	return messenger.ReceiveMessage{
-		ChatID:    update.CallbackQuery.From.ID,
+		ChatID:    int64ToString(update.Message.Chat.ID),
 		Text:      update.CallbackQuery.Data,
 		FirstName: update.CallbackQuery.From.FirstName,
 		LastName:  update.CallbackQuery.From.LastName,

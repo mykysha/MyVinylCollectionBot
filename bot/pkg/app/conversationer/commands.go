@@ -29,13 +29,13 @@ func (c Conversationer) BotInfoResponser(msg messenger.ReceiveMessage) messenger
 		return messenger.MakeTextMessage(msg.ChatID, text)
 	}
 
-	text := fmt.Sprintf("%s\nBot Start time: %v", c.answers.BotInfo, startTime.Starttime.Format(timeFormat))
+	text := fmt.Sprintf("%s\nBot Start time: %v", c.answers.BotInfo, startTime.StartTime.Format(timeFormat))
 
 	return messenger.MakeTextMessage(msg.ChatID, text)
 }
 
 func (c Conversationer) ViewGenresResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
-	genres, err := c.database.GetGenres(int(msg.ChatID))
+	genres, err := c.database.GetGenres(msg.ChatID)
 	if err != nil {
 		text := "Some error working with database, try again later"
 
@@ -54,7 +54,7 @@ func (c Conversationer) ViewGenresResponser(msg messenger.ReceiveMessage) messen
 }
 
 func (c Conversationer) ViewArtistsResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
-	artists, err := c.database.GetArtists(int(msg.ChatID))
+	artists, err := c.database.GetArtists(msg.ChatID)
 	if err != nil {
 		text := "Some error working with database, try again later"
 

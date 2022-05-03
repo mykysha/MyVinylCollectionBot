@@ -20,16 +20,16 @@ const (
 )
 
 type MsgRouter struct {
-	currentDialogue map[int64]string
-	currentPosition map[int64]string
-	currentAlbum    map[int64]int
+	currentDialogue map[string]string
+	currentPosition map[string]string
+	currentAlbum    map[string]int
 	communicator    *conversationer.Conversationer
 }
 
 func NewMsgRouter(communicator *conversationer.Conversationer) *MsgRouter {
-	currDialogue := make(map[int64]string)
-	currPos := make(map[int64]string)
-	currAlbum := make(map[int64]int)
+	currDialogue := make(map[string]string)
+	currPos := make(map[string]string)
+	currAlbum := make(map[string]int)
 
 	return &MsgRouter{
 		currentDialogue: currDialogue,

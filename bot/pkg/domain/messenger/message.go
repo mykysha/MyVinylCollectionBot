@@ -12,7 +12,7 @@ const (
 )
 
 type SendMessage struct {
-	ChatID         int64
+	ChatID         string
 	Text           string
 	InlineKeyboard [][]string
 	ReplyKeyboard  [][]string
@@ -23,7 +23,7 @@ type SendMessage struct {
 	Poll           *Poll
 }
 
-func MakeTextMessage(chatID int64, text string) SendMessage {
+func MakeTextMessage(chatID, text string) SendMessage {
 	return SendMessage{
 		ChatID:         chatID,
 		Text:           text,
@@ -37,7 +37,7 @@ func MakeTextMessage(chatID int64, text string) SendMessage {
 	}
 }
 
-func MakeKeyedTextMessage(chatID int64, text string, inline [][]string, reply [][]string) SendMessage {
+func MakeKeyedTextMessage(chatID, text string, inline [][]string, reply [][]string) SendMessage {
 	return SendMessage{
 		ChatID:         chatID,
 		Text:           text,
@@ -51,7 +51,7 @@ func MakeKeyedTextMessage(chatID int64, text string, inline [][]string, reply []
 	}
 }
 
-func MakePhotoMessage(chatID int64, text string, photo *Photo) SendMessage {
+func MakePhotoMessage(chatID, text string, photo *Photo) SendMessage {
 	return SendMessage{
 		ChatID:         chatID,
 		Text:           text,
@@ -65,7 +65,7 @@ func MakePhotoMessage(chatID int64, text string, photo *Photo) SendMessage {
 	}
 }
 
-func MakeKeyedPhotoMessage(chatID int64, text string, photo *Photo, inline [][]string, reply [][]string) SendMessage {
+func MakeKeyedPhotoMessage(chatID, text string, photo *Photo, inline [][]string, reply [][]string) SendMessage {
 	return SendMessage{
 		ChatID:         chatID,
 		Text:           text,
@@ -80,7 +80,7 @@ func MakeKeyedPhotoMessage(chatID int64, text string, photo *Photo, inline [][]s
 }
 
 type ReceiveMessage struct {
-	ChatID    int64
+	ChatID    string
 	Text      string
 	FirstName string
 	LastName  string

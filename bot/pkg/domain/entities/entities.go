@@ -3,7 +3,7 @@ package entities
 import "time"
 
 type Info struct {
-	Starttime time.Time
+	StartTime time.Time
 }
 
 type User struct {

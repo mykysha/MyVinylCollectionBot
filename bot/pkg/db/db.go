@@ -33,7 +33,7 @@ func (d Database) PutInfo(info entities.Info) error {
 		return fmt.Errorf("PutInfo: %w", err)
 	}
 
-	err = d.db.InsertInfo(info.Starttime, timeLayout)
+	err = d.db.InsertInfo(info.StartTime, timeLayout)
 	if err != nil {
 		return fmt.Errorf("PutInfo: %w", err)
 	}
@@ -52,7 +52,7 @@ func (d Database) GetInfo() (*entities.Info, error) {
 		return nil, fmt.Errorf("GetInfo: %w", err)
 	}
 
-	return &entities.Info{Starttime: startTime}, nil
+	return &entities.Info{StartTime: startTime}, nil
 }
 
 func (d Database) AddAlbumToCollection(album entities.Album, location entities.Location) error {

@@ -9,7 +9,7 @@ import (
 )
 
 func (c Conversationer) ViewCollectionResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
-	albums, err := c.database.GetCollection(int(msg.ChatID))
+	albums, err := c.database.GetCollection(msg.ChatID)
 	if err != nil {
 		text := "Some error working with database, try again later"
 
@@ -43,7 +43,7 @@ func (c Conversationer) ShowingFullResponser(msg messenger.ReceiveMessage) (bool
 		return false, 0, messenger.MakeTextMessage(msg.ChatID, text)
 	}
 
-	albums, err := c.database.GetCollection(int(msg.ChatID))
+	albums, err := c.database.GetCollection(msg.ChatID)
 	if err != nil {
 		text := "Could not find your collection. Are you sure you have it?"
 

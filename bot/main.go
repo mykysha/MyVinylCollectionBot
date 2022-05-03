@@ -88,7 +88,7 @@ func createCommunicator() (*conversationer.Conversationer, error) {
 		return nil, fmt.Errorf("createCommunicator: %w", err)
 	}
 
-	err = database.PutInfo(entities.Info{Starttime: time.Now()})
+	err = database.PutInfo(entities.Info{StartTime: time.Now()})
 	if err != nil {
 		return nil, fmt.Errorf("createCommunicator: %w", err)
 	}

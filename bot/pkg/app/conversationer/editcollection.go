@@ -76,7 +76,7 @@ func (c Conversationer) Adder(msg messenger.ReceiveMessage) (bool, messenger.Sen
 
 	location := entities.Location{
 		Owner: entities.User{
-			ChatID:   strconv.FormatInt(msg.ChatID, 10),
+			ChatID:   msg.ChatID,
 			UserName: msg.UserName,
 		},
 		Name: args[7],
@@ -95,7 +95,7 @@ func (c Conversationer) Adder(msg messenger.ReceiveMessage) (bool, messenger.Sen
 }
 
 func (c Conversationer) DeletingFromCollectionResponser(msg messenger.ReceiveMessage, curAlbum int) messenger.SendMessage {
-	err := c.database.DeleteAlbum(curAlbum, int(msg.ChatID))
+	err := c.database.DeleteAlbum(curAlbum, msg.ChatID)
 	if err != nil {
 		text := "Some error working with database, try again later"
 
@@ -108,7 +108,7 @@ func (c Conversationer) DeletingFromCollectionResponser(msg messenger.ReceiveMes
 }
 
 func (c Conversationer) EditInCollectionResponser(msg messenger.ReceiveMessage, curAlbum int) (bool, messenger.SendMessage) {
-	err := c.database.DeleteAlbum(curAlbum, int(msg.ChatID))
+	err := c.database.DeleteAlbum(curAlbum, msg.ChatID)
 	if err != nil {
 		text := "Some error working with database, try again later"
 
