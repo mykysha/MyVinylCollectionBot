@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/nndergunov/tgBot/bot/pkg/domain/messenger"
+	"github.com/nndergunov/tgBot/bot/pkg/spreadsheetconverter"
 )
 
 func (c Conversationer) StartResponser(msg messenger.ReceiveMessage) messenger.SendMessage {
@@ -82,4 +83,28 @@ func (c Conversationer) TakeHomeResponser(msg messenger.ReceiveMessage) messenge
 	text := "Ok, returning you to start menu"
 
 	return messenger.MakeKeyedTextMessage(msg.ChatID, text, nil, c.keyboards[StartKeyboardKey])
+}
+
+func (c Conversationer) ConvertToXLSX(msg messenger.ReceiveMessage) messenger.SendMessage {
+	albums, err := c.database.GetCollection(msg.ChatID, msg.UserName)
+	if err != nil || albums == nil {
+		text := "Could not find your collection. Are you sure you have it?"
+
+		return messenger.MakeTextMessage(msg.ChatID, text)
+	}
+
+	file := spreadsheetconverter.ConvertToExcel(albums)
+
+	return messenger.SendMessage{
+		ChatID:         msg.ChatID,
+		Text:           "Your collection file!",
+		InlineKeyboard: nil,
+		ReplyKeyboard:  nil,
+		Photo:          nil,
+		Voice:          nil,
+		VideoNote:      nil,
+		Video:          nil,
+		Poll:           nil,
+		File:           file,
+	}
 }

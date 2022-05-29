@@ -1,6 +1,9 @@
 package messenger
 
-import "time"
+import (
+	"bytes"
+	"time"
+)
 
 const (
 	TextType      = "text"
@@ -21,6 +24,7 @@ type SendMessage struct {
 	VideoNote      *VideoNote
 	Video          *Video
 	Poll           *Poll
+	File           *bytes.Buffer
 }
 
 func MakeTextMessage(chatID, text string) SendMessage {

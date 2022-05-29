@@ -34,6 +34,8 @@ func (r *MsgRouter) homeDialogue(msg messenger.ReceiveMessage) (answer messenger
 		return r.communicator.ViewArtistsResponser(msg)
 	case "Bot info":
 		return r.communicator.BotInfoResponser(msg)
+	case "Convert to XSLX":
+		return r.communicator.ConvertToXLSX(msg)
 	default:
 		return r.communicator.UnsupportedResponser(msg)
 	}

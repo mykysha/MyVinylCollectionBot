@@ -17,13 +17,17 @@ func stringToInt64(s string) (int64, error) {
 	return res, nil
 }
 
-func (tg TgBot) Send(messasge messenger.SendMessage) error {
+func (tg TgBot) Send(message messenger.SendMessage) error {
 	var err error
 
-	if messasge.Photo != nil {
-		err = tg.sendPhoto(messasge)
+	if message.Photo != nil {
+		err = tg.sendPhoto(message)
 	} else {
-		err = tg.sendText(messasge)
+		if message.File != nil {
+			err = tg.sendFile(message)
+		} else {
+			err = tg.sendText(message)
+		}
 	}
 
 	if err != nil {
@@ -33,24 +37,24 @@ func (tg TgBot) Send(messasge messenger.SendMessage) error {
 	return nil
 }
 
-func (tg TgBot) sendPhoto(messasge messenger.SendMessage) error {
-	id, err := stringToInt64(messasge.ChatID)
+func (tg TgBot) sendPhoto(message messenger.SendMessage) error {
+	id, err := stringToInt64(message.ChatID)
 	if err != nil {
 		return fmt.Errorf("sendPhoto: %w", err)
 	}
 
-	msg := tgbotapi.NewPhoto(id, tgbotapi.FileID(messasge.Photo.FileUniqueID))
+	msg := tgbotapi.NewPhoto(id, tgbotapi.FileID(message.Photo.FileUniqueID))
 
-	if messasge.Text != "" {
-		msg.Caption = messasge.Text
+	if message.Text != "" {
+		msg.Caption = message.Text
 	}
 
-	if messasge.ReplyKeyboard != nil {
-		msg.ReplyMarkup = newReplyKeyboard(messasge.ReplyKeyboard)
+	if message.ReplyKeyboard != nil {
+		msg.ReplyMarkup = newReplyKeyboard(message.ReplyKeyboard)
 	}
 
-	if messasge.InlineKeyboard != nil {
-		msg.ReplyMarkup = newInlineKeyboard(messasge.InlineKeyboard)
+	if message.InlineKeyboard != nil {
+		msg.ReplyMarkup = newInlineKeyboard(message.InlineKeyboard)
 	}
 
 	_, err = tg.bot.Send(msg)
@@ -61,25 +65,46 @@ func (tg TgBot) sendPhoto(messasge messenger.SendMessage) error {
 	return nil
 }
 
-func (tg TgBot) sendText(messasge messenger.SendMessage) error {
-	id, err := stringToInt64(messasge.ChatID)
+func (tg TgBot) sendText(message messenger.SendMessage) error {
+	id, err := stringToInt64(message.ChatID)
 	if err != nil {
 		return fmt.Errorf("sendText: %w", err)
 	}
 
-	msg := tgbotapi.NewMessage(id, messasge.Text)
+	msg := tgbotapi.NewMessage(id, message.Text)
 
-	if messasge.ReplyKeyboard != nil {
-		msg.ReplyMarkup = newReplyKeyboard(messasge.ReplyKeyboard)
+	if message.ReplyKeyboard != nil {
+		msg.ReplyMarkup = newReplyKeyboard(message.ReplyKeyboard)
 	}
 
-	if messasge.InlineKeyboard != nil {
-		msg.ReplyMarkup = newInlineKeyboard(messasge.InlineKeyboard)
+	if message.InlineKeyboard != nil {
+		msg.ReplyMarkup = newInlineKeyboard(message.InlineKeyboard)
 	}
 
 	_, err = tg.bot.Send(msg)
 	if err != nil {
 		return fmt.Errorf("sendText: %w", err)
+	}
+
+	return nil
+}
+
+func (tg TgBot) sendFile(message messenger.SendMessage) error {
+	id, err := stringToInt64(message.ChatID)
+	if err != nil {
+		return fmt.Errorf("sendText: %w", err)
+	}
+
+	f := tgbotapi.FileReader{
+		Name:   "collection.xlsx",
+		Reader: message.File,
+	}
+
+	msg := tgbotapi.NewDocument(id, f)
+
+	_, err = tg.bot.Send(msg)
+	if err != nil {
+		return fmt.Errorf("sendFile: %w", err)
 	}
 
 	return nil
